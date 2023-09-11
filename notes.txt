@@ -30,3 +30,9 @@
 	dropping
 
 
+Tips and tricks
+	Understand BGP Finite State Machine
+	IP Functionality
+	Create a class diagram of the project
+	Code ..:DD::D
+
