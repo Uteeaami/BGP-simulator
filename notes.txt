@@ -1,0 +1,32 @@
+1. Customizable network topology
+	User can specify links between routers, there are no links at the 	
+	start
+
+2. Router initiliazation and customizable routing tables
+	customizable routing tables, only "boilerplate" routes with own
+	ips etc at the start
+
+3.BGP
+	Routers have TCP connections
+	BGP messages including KEEPALIVE
+	Routers are autonomous with the freedom to implement their 
+	routing policies
+
+4.IPfunc
+	Ip packets based on routing alghoritms
+	Accurate IP func is essential for proper routing
+	Routers receive packets
+
+5.Trust between routers
+	New message type in BGP
+
+6. Voting mechanism
+	Neighbours of neighbors participate in voting for a specific
+	neighbors trustworthiness
+
+7. Fragmentation and error conditions
+	fragmentation simulation is not mandatory
+	Simulating error conditions, such as routers going offline or
+	dropping
+
+
