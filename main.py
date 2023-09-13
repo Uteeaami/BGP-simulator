@@ -63,6 +63,12 @@ def main():
     router4.print_interfaces()
     router5.print_interfaces()
 
+    router1.print_connections()
+    router2.print_connections()
+    router3.print_connections()
+    router4.print_connections()
+    router5.print_connections()
+
     # Start the router threads
     for thread in router_threads:
         thread.start()

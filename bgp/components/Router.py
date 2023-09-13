@@ -6,7 +6,6 @@ import threading
 class Router:
     def __init__(self, name):
         self.name = name
-        self.id = random.randint(0, 10**10)
         self.interfaces = []
         self.connections = []
         self.lock = threading.Lock()
@@ -18,6 +17,9 @@ class Router:
     def add_connection(self, router):
         with self.lock:
             self.connections.append(router)
+
+            # Add a reverse connection from the other router to this router
+            router.connections.append(self)
 
     def send_message(self, message):
         with self.lock:
@@ -34,6 +36,12 @@ class Router:
             print(f"########### {self.name} has interfaces ###########")
             for interface in self.interfaces:
                 print(interface)
+
+    def print_connections(self):
+        with self.lock:
+            print(f"########### {self.name} has connections ###########")
+        for connection in self.connections:
+            print(connection.name)
 
 
 def router_task(router):
