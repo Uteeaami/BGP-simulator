@@ -10,6 +10,9 @@ class Router:
         self.connections = []
         self.lock = threading.Lock()
 
+    def __str__(self):
+        return f"Router {self.name}"
+
     def add_interface(self, interface):
         with self.lock:
             self.interfaces.append(interface)
@@ -31,17 +34,15 @@ class Router:
         with self.lock:
             print(f"{self.name} received message: {message}")
 
-    def print_interfaces(self):
+    def print_info(self):
         with self.lock:
-            print(f"########### {self.name} has interfaces ###########")
+            print(f"########### {self.name} Info ###########")
+            print("Interfaces:")
             for interface in self.interfaces:
                 print(interface)
-
-    def print_connections(self):
-        with self.lock:
-            print(f"########### {self.name} has connections ###########")
-        for connection in self.connections:
-            print(connection.name)
+            print("Connections:")
+            for connection in self.connections:
+                print(f" - {connection.name}")
 
 
 def router_task(router):

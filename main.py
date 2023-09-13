@@ -57,17 +57,11 @@ def main():
         threading.Thread(target=router_task, args=(router5,))
     ]
 
-    router1.print_interfaces()
-    router2.print_interfaces()
-    router3.print_interfaces()
-    router4.print_interfaces()
-    router5.print_interfaces()
-
-    router1.print_connections()
-    router2.print_connections()
-    router3.print_connections()
-    router4.print_connections()
-    router5.print_connections()
+    router1.print_info()
+    router2.print_info()
+    router3.print_info()
+    router4.print_info()
+    router5.print_info()
 
     # Start the router threads
     for thread in router_threads:
