@@ -59,13 +59,13 @@ def create_default_connections():
 def main():
 
     print("\nBGP-Simulator")
-    print("First, connect routers to each other by typing 'r1' and 'r2' for example\n")
+    print("First, connect routers to each other by typing 'r1' and 'r2' for example")
 
     while (True):
-        option1 = input("Connect router (or 'q' to quit): ")
+        option1 = input("\nConnect router (or 'q' to quit): ")
         if option1 == 'q':
             break
-        option2 = input("To: \n")
+        option2 = input("To: ")
 
         router1 = next(
             (router for router in routers if router.name == option1), None)
