@@ -56,16 +56,20 @@ Problems are since the sequence and acknowledge nubmers change, how do we do tha
 """
 
 import struct
+import random
 
 
-def tcp_packet_build(type, sequence_number, acknowledgement_number):
-    binary_sequence_number = struct.pack('!L', sequence_number)
-    binary_sequence_number_str = ''.join(format(byte, '08b') for byte in binary_sequence_number)
+def tcp_packet_build(type, acknowledgement_number):
+    # Do or not to do?
+    # binary_sequence_number = struct.pack('!L', sequence_number)
+    # binary_sequence_number_str = ''.join(format(byte, '08b') for byte in binary_sequence_number)
 
-    binary_acknowledgement_number = struct.pack('!L', acknowledgement_number)
-    binary_acknowledgement_number_str = ''.join(format(byte, '08b') for byte in binary_acknowledgement_number)
+    # binary_acknowledgement_number = struct.pack('!L', acknowledgement_number)
+    # binary_acknowledgement_number_str = ''.join(format(byte, '08b') for byte in binary_acknowledgement_number)
+    sequence_number = random.randint(0, 4294967295)
+
     type = tcp_type_check(type)
-    packet = struct.pack('!2h2L4hb',
+    packet = struct.pack('!2H2L4HB',
                          0xC5,
                          0xC5,
                          sequence_number,
