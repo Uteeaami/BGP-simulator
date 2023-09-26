@@ -97,7 +97,7 @@ def tcp_type_check(type):
     elif (type == "SYN"):
         type = 0x02
     else:
-        print("TCP Control Bit invalid...")
+        logging.info("TCP Control Bit invalid...")
 
     return type
 
