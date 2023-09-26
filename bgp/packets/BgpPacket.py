@@ -27,7 +27,7 @@ def construct_header(msglen, msgtype):
                          msglen + 19,
                          msgtype)
 
-    print("MSG LENGTH:", msglen + 19)
+    logging.info("MSG LENGTH:", msglen + 19)
     return output
 
 def octets_required(paramlen):
@@ -59,12 +59,12 @@ def open(myAS, holdtime, BGPid, optparam):
 
     msglen = len(openmsg)
     
-    #print("msglen: ", msglen)
-    #print("no header: ", binascii.hexlify(openmsg))
+    #logging.info("msglen: ", msglen)
+    #logging.info("no header: ", binascii.hexlify(openmsg))
     header = construct_header(msglen, 1)
     output = header + openmsg
-    print("openmsg bytes: ", output)
-    print("opemmsg hexed: ", binascii.hexlify(output))
+    logging.info("openmsg bytes: ", output)
+    logging.info("opemmsg hexed: ", binascii.hexlify(output))
     return output
 
 # make open() like this
@@ -91,9 +91,9 @@ def update(wdroutes, PATHatbrs, NLRI):
     msglen = len(updatemsg)
     header = construct_header(msglen, 2)
     output = header + updatemsg
-    print("updatemsg bytes: ", output)
-    print("only_____header: ", binascii.hexlify(header))
-    print("updatemsg hexed: ", binascii.hexlify(output))
+    logging.info("updatemsg bytes: ", output)
+    logging.info("only_____header: ", binascii.hexlify(header))
+    logging.info("updatemsg hexed: ", binascii.hexlify(output))
 
     output = updatemsg
     return output
@@ -103,7 +103,7 @@ asd = 0
 optparam = asd.to_bytes(5, byteorder="big")
 #open(1, 10, 0, optparam)
 update(0,optparam,0)
-#print (binascii.hexlify(open(255, 0, 1028, 0)))
+#logging.info (binascii.hexlify(open(255, 0, 1028, 0)))
 
 # todo 1-4 messages
 

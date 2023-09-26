@@ -1,5 +1,6 @@
 import time
 import threading
+import logging
 from bgp.components.Interface import Interface
 
 
@@ -33,24 +34,25 @@ class Router:
         if router not in self.connections:
             self.connections.append(router)
         else:
-            print("Connection already exists")
+            logging.info("Connection already exists")
 
     def send_message(self, message):
-            print(f"{self.name} sent message: {message}")
+            logging.info(f"{self.name} sent message: {message}")
+            
             for router in self.connections:
                 router.receive_message(message)
 
     def receive_message(self, message):
-            print(f"{self.name} received message: {message}")
+            logging.info(f"{self.name} received message: {message}")
 
-    def print_info(self):
-            print(f"########### {self.name} Info ###########")
-            print("Interfaces:")
+    def log_info(self):
+            logging.info(f"########### {self.name} Info ###########")
+            logging.info("Interfaces:")
             for interface in self.interfaces:
-                print(interface)
-            print("Connections:")
+                logging.info(interface)
+            logging.info("Connections:")
             for connection in self.connections:
-                print(f" - {connection.name}")
+                logging.info(f" - {connection.name}")
 
 
 def router_task(router):
@@ -60,5 +62,5 @@ def router_task(router):
             router.send_message(message)
             time.sleep(2)
     except Exception as e:
-        print(f"Error in thread {router.name}: {e}")
+        logging.info(f"Error in thread {router.name}: {e}")
 

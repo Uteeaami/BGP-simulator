@@ -1,4 +1,5 @@
 import threading
+import logging
 from bgp.components.Router import Router
 from bgp.components.Router import router_task
 from bgp.components.Interface import Interface
@@ -11,6 +12,9 @@ For example the IP_addresses, interface names etc.. need to be randomized.
 """
 
 # These could be somewhere else idk and done better
+
+logging.basicConfig(format='%(message)s', encoding='utf-8', level=logging.DEBUG)
+
 routers = []
 
 r1 = Router("r1", 1, "AS1")
@@ -58,8 +62,8 @@ def create_default_connections():
 
 def main():
 
-    print("\nBGP-Simulator")
-    print("First, connect routers to each other by typing 'r1' and 'r2' for example")
+    logging.info("\nBGP-Simulator")
+    logging.info("First, connect routers to each other by typing 'r1' and 'r2' for example")
 
     while (True):
         option1 = input("\nConnect router (or 'q' to quit): ")
@@ -76,17 +80,17 @@ def main():
             router1.add_connection(router2)
             router2.add_connection(router1)
         else:
-            print("Invalid router name. Please try again.")
+            logging.info("Invalid router name. Please try again.")
 
     # Check if any routers are not connected and add default connections
     unconnected_routers = [
         router for router in routers if not router.connections]
     if unconnected_routers:
-        print("Adding default connections for unconnected routers...")
+        logging.info("Adding default connections for unconnected routers...")
         create_default_connections()
 
     for router in routers:
-        router.print_info()
+        router.log_info()
 
     router_threads = []
 
