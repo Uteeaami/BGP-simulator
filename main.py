@@ -89,22 +89,12 @@ def main():
         logging.info("Adding default connections for unconnected routers...")
         create_default_connections()
 
-    #TCP connection simulation -- needs threading
+    #TCP connection simulation -- needs threading?
     for router in routers:
-        router.log_info()
+        tcp_connection(router)
 
-    router_threads = []
-
-    for router in routers:
-        thread = threading.Thread(target=router_task, args=(router,))
-        thread.start()
-        router_threads.append(thread)
-
-    for thread in router_threads:
-        thread.join()
-
-    # TODO: TCP connection simulation - in own module perhaps, so that code is clean yes
     # TODO: BGP simulation - in own module perhaps, so that code is clean yes
+    #
 
 
 if __name__ == "__main__":

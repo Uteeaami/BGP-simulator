@@ -1,6 +1,7 @@
 from bgp.packets.IpPacket import ip_packet_build
 from bgp.globals import *
 import struct
+import logging
 
 
 def tcp_connection(router):
@@ -17,7 +18,7 @@ def tcp_connection(router):
 
 
 def establish_connection(sender_ip, receiver_ip):
-    print(f"Connecting interfaces [{sender_ip}] - [{receiver_ip}]")
+    logging.info(f"Connecting interfaces [{sender_ip}] - [{receiver_ip}]")
     send_ip_packet(sender_ip, receiver_ip, 0, "SYN")
 
 
@@ -32,15 +33,18 @@ def receive_ip_packet(sender_ip, receiver_ip, acknowledgement_number, packet):
     tcp_type = struct.unpack(TCP_IP_PACKET, packet)[14]
 
     if tcp_type == 2:
-        print(f"SYN message received from [{sender_ip}]")
-        print(f"Sending SYNACK from [{receiver_ip}] to [{sender_ip}]")
+        logging.info(f"SYN message received from [{sender_ip}]")
+        logging.info(f"Sending SYNACK from [{receiver_ip}] to [{sender_ip}]")
         send_ip_packet(receiver_ip, sender_ip,
                        acknowledgement_number, "SYNACK")
+
     elif tcp_type == 18:
-        print(f"SYNACK message received from [{sender_ip}]")
-        print(f"Sending ACK from [{receiver_ip}] to [{sender_ip}]")
+        logging.info(f"SYNACK message received from [{sender_ip}]")
+        logging.info(f"Sending ACK from [{receiver_ip}] to [{sender_ip}]")
         send_ip_packet(receiver_ip, sender_ip, acknowledgement_number, "ACK")
+
     elif tcp_type == 16:
-        print(f"CONNECTION ESTABLISHED [{receiver_ip}] - [{sender_ip}]")
-    else: 
-        print("wtf")
+        logging.info(
+            f"CONNECTION ESTABLISHED [{receiver_ip}] - [{sender_ip}]\n")
+    else:
+        logging.info("wtf")
