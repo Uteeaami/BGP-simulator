@@ -1,7 +1,6 @@
-import threading
 from bgp.components.Router import Router
-from bgp.components.Router import router_task
-from bgp.components.Interface import Interface
+from bgp.simulation.TcpConnection import tcp_connection
+from bgp.globals import *
 
 """
 Routers have n interfaces that are the independent "connections?" between the routers
@@ -11,7 +10,6 @@ For example the IP_addresses, interface names etc.. need to be randomized.
 """
 
 # These could be somewhere else idk and done better
-routers = []
 
 r1 = Router("r1", 1, "AS1")
 r2 = Router("r2", 2, "AS2")
@@ -56,6 +54,7 @@ def create_default_connections():
         src_router.add_connection(dest_router)
         dest_router.add_connection(src_router)
 
+
 def main():
 
     print("\nBGP-Simulator")
@@ -85,20 +84,12 @@ def main():
         print("Adding default connections for unconnected routers...")
         create_default_connections()
 
+    #TCP connection simulation -- needs threading
     for router in routers:
-        router.print_info()
+        tcp_connection(router)
 
-    router_threads = []
 
-    for router in routers:
-        thread = threading.Thread(target=router_task, args=(router,))
-        thread.start()
-        router_threads.append(thread)
-
-    for thread in router_threads:
-        thread.join()
-
-    # TODO: TCP connection simulation - in own module perhaps, so that code is clean yes
+    print("Program exited gracefully.")
     # TODO: BGP simulation - in own module perhaps, so that code is clean yes
 
 

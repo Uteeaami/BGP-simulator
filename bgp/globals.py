@@ -1,2 +1,3 @@
-
 TCP_PORT = 179
+TCP_IP_PACKET = "!2B3H2BH2L2H2L4HB"
+routers = []

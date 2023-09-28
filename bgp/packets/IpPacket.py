@@ -1,6 +1,6 @@
 import struct
 import socket
-from TcpPacket import tcp_packet_build
+from bgp.packets.TcpPacket import tcp_packet_build
 
 """
 Options kept at zero
@@ -16,8 +16,10 @@ Header Checksum         = 0x0000 - We can implement this, so lets keep it open
 Source & destination IP's 
 """
 def ip_packet_build(source_ip, destination_ip, acknowledgement_number ,type):
+
     converted_source_ip = struct.unpack("!L", socket.inet_aton(source_ip) )[0]
     converted_destination_ip = struct.unpack("!L", socket.inet_aton(destination_ip) )[0]
+
     packet = struct.pack('!2B3H2BH2L',
                          0x45,
                          0x30,
@@ -30,6 +32,7 @@ def ip_packet_build(source_ip, destination_ip, acknowledgement_number ,type):
                          converted_source_ip,
                          converted_destination_ip
                          )
+    
     #Random generator for ack and sequence numbers? But these need to be remembered....
     #ACK == sequence_number + 1
     #Probably in receivers end -> decrypt packet -> get sequence -> add +1 -> make a new packet
