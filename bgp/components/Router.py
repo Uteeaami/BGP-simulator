@@ -1,4 +1,5 @@
 import threading
+import logging
 from bgp.globals import *
 from bgp.components.Interface import Interface
 from bgp.packets.IpPacket import ip_packet_build
@@ -35,7 +36,7 @@ class Router:
         if router not in self.connections:
             self.connections.append(router)
         else:
-            print("Connection already exists")
+            logging.info("Connection already exists")
 
     def add_tcp_connection(self, router):
         if router not in self.tcp_connections:
@@ -43,11 +44,22 @@ class Router:
         else:
             print(f"TCP connection to {router.name} already exists.")
 
-    def print_info(self):
-        print(f"########### {self.name} Info ###########")
-        print("Interfaces:")
-        for interface in self.interfaces:
-            print(interface)
-        print("Connections:")
-        for connection in self.connections:
-            print(f" - {connection.name}")
+    def log_info(self):
+            logging.info(f"########### {self.name} Info ###########")
+            logging.info("Interfaces:")
+            for interface in self.interfaces:
+                logging.info(interface)
+            logging.info("Connections:")
+            for connection in self.connections:
+                logging.info(f" - {connection.name}")
+
+
+def router_task(router):
+    try:
+        while True:
+            message = f"Hello from {router.name}"
+            router.send_message(message)
+            time.sleep(2)
+    except Exception as e:
+        logging.info(f"Error in thread {router.name}: {e}")
+

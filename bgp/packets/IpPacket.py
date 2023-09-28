@@ -43,8 +43,8 @@ def ip_packet_build(source_ip, destination_ip, acknowledgement_number ,type):
 
 def main():
     packet = ip_packet_build("192.168.1.1", "192.168.2.1", 0, "SYNACK")
-    print(struct.unpack("!2B3H2BH2L2H2L4HB", packet))
-    print(packet)
+    logging.info(struct.unpack("!2B3H2BH2L2H2L4HB", packet))
+    logging.info(packet)
 
 
 if __name__ == "__main__":
