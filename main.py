@@ -93,8 +93,12 @@ def main():
     for router in routers:
         tcp_connection(router)
 
+    for router in routers:
+        print(router.name)
+        for tcp in router.tcp_connections:
+            print(tcp)
     # TODO: BGP simulation - in own module perhaps, so that code is clean yes
-    #
+    # TODO: Routingtables - Some higher level one that stores all routers and their connections -> From there the actual one can be made
 
 
 if __name__ == "__main__":

@@ -7,14 +7,16 @@ import logging
 def tcp_connection(router):
     for interface in router.interfaces:
         for neighbor in router.connections:
-            for neighbor_interface in neighbor.interfaces:
-                ip1 = interface.ip_address.split(".")
-                ip2 = neighbor_interface.ip_address.split(".")
-                if ip1[2] == ip2[3] and ip1[3] == ip2[2]:
-                    establish_connection(
-                        interface.ip_address, neighbor_interface.ip_address)
-                    router.add_tcp_connection(neighbor)
-                    neighbor.add_tcp_connection(router)
+            if neighbor not in router.tcp_connections:
+                for neighbor_interface in neighbor.interfaces:
+                    ip1 = interface.ip_address.split(".")
+                    ip2 = neighbor_interface.ip_address.split(".")
+                    if ip1[2] == ip2[3] and ip1[3] == ip2[2]:
+                        establish_connection(
+                            interface.ip_address, neighbor_interface.ip_address)
+                        router.add_tcp_connection(neighbor)
+                        neighbor.add_tcp_connection(router)
+
 
 
 def establish_connection(sender_ip, receiver_ip):
