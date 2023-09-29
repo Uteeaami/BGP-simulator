@@ -1,9 +1,9 @@
 
 class Interface:
-    def __init__(self, name, ip_address, autonomous_system):
+    def __init__(self, name, ip_address, AS):
         self.name = name
         self.ip_address = ip_address
-        self.autonomous_system = autonomous_system
+        self.AS = AS
         
     def __str__(self):
-        return f"Name: {self.name}\n IP Address: {self.ip_address}\n Autonomous System: {self.autonomous_system}"
+        return f"ID: {self.name} | IP: {self.ip_address} | AS: {self.AS}"

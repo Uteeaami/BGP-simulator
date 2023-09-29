@@ -1,16 +1,31 @@
 import logging
+import random
+import threading
+import time
 from bgp.globals import *
 from bgp.components.Interface import Interface
+from bgp.components.networking.PacketSender import PacketSender
+from bgp.components.networking.PacketReceiver import PacketReceiver
+from bgp.components.RouterStates import RouterStates
 
 
-class Router:
+class Router(threading.Thread):
     def __init__(self, name, id, AS):
+        super().__init__()
         self.id = id
         self.name = name
         self.AS = AS
+        self.packet_queue = []
+        self.waiting_response = []
         self.interfaces = []
         self.connections = []
         self.tcp_connections = []
+        self.packet_sender = PacketSender(self)
+        self.packet_receiver = PacketReceiver(self)
+        self.state = RouterStates.OFFLINE
+        self.packet_sender_lock = threading.Lock()
+        self.packet_receiver_lock = threading.Lock()
+
 
     def __str__(self):
         return f"Router {self.name}"
@@ -42,6 +57,33 @@ class Router:
         else:
             logging.info(f"TCP connection to {router.name} already exists.")
 
+    def get_router_by_ip(self, ip_address):
+        for router in self.connections:
+            for interface in router.interfaces:
+                if(interface.ip_address == ip_address):
+                    return router
+
+    def get_interface_by_ip(self, ip_address):
+        for interface in self.interfaces:
+            if interface.ip_address == ip_address:
+                return interface
+        return None
+    
+    def get_matching_interfaces(self, neighbor_router):
+        matching_interfaces = []
+        for own_interface in self.interfaces:
+            own_interface_ip = own_interface.ip_address.split(".")
+            own_interface_ip_2, own_interface_ip_3 = own_interface_ip[2], own_interface_ip[3]
+
+            for neighbor_interface in neighbor_router.interfaces:
+                neighbor_interface_ip = neighbor_interface.ip_address.split(".")
+                neighbor_interface_ip_2, neighbor_interface_ip_3 = neighbor_interface_ip[2], neighbor_interface_ip[3]
+
+                if own_interface_ip_2 == neighbor_interface_ip_3 and own_interface_ip_3 == neighbor_interface_ip_2:
+                    matching_interfaces.append([own_interface.ip_address, neighbor_interface.ip_address])
+
+        return matching_interfaces if matching_interfaces else None
+
     def log_info(self):
             logging.info(f"########### {self.name} Info ###########")
             logging.info("Interfaces:")
@@ -51,3 +93,28 @@ class Router:
             for connection in self.connections:
                 logging.info(f" - {connection.name}")
 
+    def run(self):
+        self.state = RouterStates.IDLE
+        while self.state != RouterStates.ACTIVE:
+            
+            with self.packet_sender_lock:
+                if self.state == RouterStates.IDLE:
+                    self.state = RouterStates.CONNECTING
+                    for connection in self.connections:
+                        if (connection.state == RouterStates.CONNECTING):
+                            print("Connection already started")
+                        else:
+                            self.packet_sender.send_ip_packet(connection, "SYN")
+
+            if self.packet_queue:
+                self.state = RouterStates.CONNECTING
+                if(self.packet_receiver.receive_packet(self.packet_queue[0]) == True):
+                    self.state = RouterStates.ACTIVE
+                self.packet_queue.pop(0)
+            
+            if self.waiting_response:
+                self.state = RouterStates.CONNECTING
+
+        while self.state == RouterStates.ACTIVE:
+            print(f"Active")
+            time.sleep(60)
