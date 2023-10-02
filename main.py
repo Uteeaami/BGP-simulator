@@ -40,7 +40,18 @@ routers.append(r10)
 
 
 def create_default_connections():
-
+    """
+        r1 has r2, r3, r7
+        r2 has r1, r4
+        r3 has r1, r6
+        r4 has r2, r9
+        r5 has r6, r10
+        r6 has r3, r5, r8
+        r7 has r1
+        r8 has r6
+        r9 has r4
+        r10 has r5
+    """
     connections = [
         ("r1", "r2"),
         ("r1", "r3"),
@@ -91,12 +102,8 @@ def main():
 
     #TCP connection simulation -- needs threading?
     for router in routers:
-        tcp_connection(router)
+        router.start()
 
-    for router in routers:
-        print(router.name)
-        for tcp in router.tcp_connections:
-            print(tcp)
     # TODO: BGP simulation - in own module perhaps, so that code is clean yes
     # TODO: Routingtables - Some higher level one that stores all routers and their connections -> From there the actual one can be made
 

@@ -96,25 +96,27 @@ class Router(threading.Thread):
     def run(self):
         self.state = RouterStates.IDLE
         while self.state != RouterStates.ACTIVE:
-            
-            with self.packet_sender_lock:
-                if self.state == RouterStates.IDLE:
-                    self.state = RouterStates.CONNECTING
+
+            if self.state == RouterStates.IDLE:
+                self.state = RouterStates.CONNECTING
+                with self.packet_sender_lock:
                     for connection in self.connections:
-                        if (connection.state == RouterStates.CONNECTING):
-                            print("Connection already started")
-                        else:
-                            self.packet_sender.send_ip_packet(connection, "SYN")
-
-            if self.packet_queue:
-                self.state = RouterStates.CONNECTING
-                if(self.packet_receiver.receive_packet(self.packet_queue[0]) == True):
-                    self.state = RouterStates.ACTIVE
-                self.packet_queue.pop(0)
+                        self.packet_sender.send_ip_packet(connection, "SYN")
             
-            if self.waiting_response:
-                self.state = RouterStates.CONNECTING
+            if  self.packet_queue:
+                with self.packet_receiver_lock:
+                    packet = self.packet_receiver.receive_packet(self.packet_queue[0])
+                    self.packet_queue.pop(0)
+                    if packet == True:
+                        if self.packet_queue:
+                            self.state = RouterStates.CONNECTING
+                        else:
+                            self.state = RouterStates.ACTIVE
 
-        while self.state == RouterStates.ACTIVE:
-            print(f"Active")
-            time.sleep(60)
+        while True:
+            time.sleep(random.randint(15,20))
+            print(self.waiting_response)
+            print("Active", self.name)
+            print("connections", self.tcp_connections)
+            break
+

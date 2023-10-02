@@ -10,7 +10,7 @@ class PacketReceiver:
     def receive_packet(self, packet):
         type = struct.unpack(TCP_IP_PACKET, packet)[6]
         if type == 6:
-            self.receive_tcp_packet(packet)
+            return self.receive_tcp_packet(packet)
         else:
             return None
         
@@ -24,28 +24,30 @@ class PacketReceiver:
         receiver_router = self.router.get_router_by_ip(sender_ip)
 
         if tcp_type == 2:
-            # print(f"SYN message received from [{sender_ip}]")
-            # print(f"Sending SYNACK from [{receiver_ip}] to [{sender_ip}]")
+            # print(f"Sending SYNACK from [{self.router.name}] to [{receiver_router.name}]")
             self.router.packet_sender.send_ip_packet(receiver_router, "SYNACK")
-            self.router.waiting_response.append(receiver_router)
             if self.router in receiver_router.waiting_response:
                 receiver_router.waiting_response.remove(self.router)
             return False
 
         elif tcp_type == 18:
-            # print(f"SYNACK message received from [{sender_ip}]")
-            # print(f"Sending ACK from [{receiver_ip}] to [{sender_ip}]")
+            # print(f"Sending ACK from [{self.router.name}] to [{receiver_router.name}]")
             self.router.packet_sender.send_ip_packet(receiver_router, "ACK")
             if self.router in receiver_router.waiting_response:
                 receiver_router.waiting_response.remove(self.router)
-            self.router.state = RouterStates.ACTIVE
             return False
         
         elif tcp_type == 16:
-            # print(f"CONNECTION ESTABLISHED [{receiver_ip}] - [{sender_ip}]\n")
+            print(f"CONNECTION ESTABLISHED [{self.router.name}] - [{receiver_router.name}]\n")
+            if self.router in receiver_router.waiting_response:
+                receiver_router.waiting_response.remove(self.router)
+            self.router.tcp_connections.append(receiver_router)
             return True
         else:
             print("wtf")
+            return False
+        
+        return False
 
 
     
