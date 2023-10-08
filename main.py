@@ -1,7 +1,6 @@
 import threading
 from bgp.components.Router import Router
-from bgp.components.Router import router_task
-from bgp.components.Interface import Interface
+import logging
 
 """
 Routers have n interfaces that are the independent "connections?" between the routers
@@ -10,65 +9,92 @@ For example the IP_addresses, interface names etc.. need to be randomized.
 
 """
 
-def main():
-    interface1_2 = Interface("Interface 1.2", "10.0.1.2", "AS1")
-    interface1_3 = Interface("Interface 1.3", "10.0.1.3", "AS1")
-    interface2_1 = Interface("Interface 2.1", "10.0.2.1", "AS2")
-    interface2_4 = Interface("Interface 2.4", "10.0.2.4", "AS2")
-    interface3_1 = Interface("Interface 3.1", "10.0.3.1", "AS3")
-    interface3_4 = Interface("Interface 3.4", "10.0.3.4", "AS3")
-    interface4_2 = Interface("Interface 4.2", "10.0.4.2", "AS4")
-    interface4_3 = Interface("Interface 4.3", "10.0.4.3", "AS4")
-    interface4_5 = Interface("Interface 4.4", "10.0.4.5", "AS4")
-    interface5_4 = Interface("Interface 4.5", "10.0.5.4", "AS5")
 
-    # Create 5 routers
-    router1 = Router("Router 1")
-    router2 = Router("Router 2")
-    router3 = Router("Router 3")
-    router4 = Router("Router 4")
-    router5 = Router("Router 5")
+logging.basicConfig(format='%(message)s', encoding='utf-8', level=logging.DEBUG)
 
-    # Add interfaces to routers
-    router1.add_interface(interface1_2)
-    router1.add_interface(interface1_3)
-    router2.add_interface(interface2_1)
-    router2.add_interface(interface2_4)
-    router3.add_interface(interface3_1)
-    router3.add_interface(interface3_4)
-    router4.add_interface(interface4_2)
-    router4.add_interface(interface4_3)
-    router4.add_interface(interface4_5)
-    router5.add_interface(interface5_4)
+real_address = ["192.168.0.106", "192.168.0.107", "192.168.0.108",
+                "192.168.0.109", "192.168.0.103",
+                "192.168.0.111", "192.168.0.112", "192.168.0.104",
+                "192.168.0.113", "192.168.0.114", "192.168.0.115",
+                "192.168.0.116", "192.168.0.119", "192.168.0.120",
+                "192.168.0.121", "192.168.0.122", "192.168.0.123",
+                "192.168.0.124", "192.168.0.125", "192.168.0.126",
+                ]
+routers = []
 
-    # Connect routers
-    router1.add_connection(router2)
-    router1.add_connection(router3)
-    router2.add_connection(router4)
-    router3.add_connection(router4)
-    router4.add_connection(router5)
+r1 = Router("r1", 1, "AS1")
+r2 = Router("r2", 2, "AS2")
+r3 = Router("r3", 3, "AS3")
+r4 = Router("r4", 4, "AS4")
+r5 = Router("r5", 5, "AS5")
+r6 = Router("r6", 6, "AS6")
+r7 = Router("r7", 7, "AS7")
+r8 = Router("r8", 8, "AS8")
+r9 = Router("r9", 9, "AS9")
+r10 = Router("r10", 10, "AS10")
 
-    # Create threads for each router
-    router_threads = [
-        threading.Thread(target=router_task, args=(router1,)),
-        threading.Thread(target=router_task, args=(router2,)),
-        threading.Thread(target=router_task, args=(router3,)),
-        threading.Thread(target=router_task, args=(router4,)),
-        threading.Thread(target=router_task, args=(router5,))
+routers.append(r1)
+routers.append(r2)
+routers.append(r3)
+routers.append(r4)
+routers.append(r5)
+routers.append(r6)
+routers.append(r7)
+routers.append(r8)
+routers.append(r9)
+routers.append(r10)
+
+connections = [
+        ("r1", "r2"),
+        ("r1", "r3"),
+        ("r2", "r4"),
+        ("r3", "r6"),
+        ("r5", "r6"),
+        ("r6", "r8"),
+        ("r7", "r1"),
+        ("r9", "r4"),
+        ("r10", "r5"),
     ]
 
-    router1.print_info()
-    router2.print_info()
-    router3.print_info()
-    router4.print_info()
-    router5.print_info()
+def create_default_connections():
 
-    # Start the router threads
-    for thread in router_threads:
-        thread.start()
+    servers = []
 
-    for thread in router_threads:
-        thread.join()
+    for router in routers:
+        router.set_server(real_address[0])
+        del real_address[0]
+
+    for connect in connections:
+        for router in routers:
+            if router.name == connect[1]:
+                server_addr = router.get_server()
+        for router in routers:
+            if router.name == connect[0]:
+                router.add_client(real_address[0], server_addr)
+                del real_address[0]
+
+def main():
+
+    while (True):
+        option1 = input("\nConnect router (or 'enter' to continue): ")
+        if option1 == '':
+            break
+        option2 = input("To: ")
+
+        router1 = next(
+            (router for router in routers if router.name == option1), None)
+        router2 = next(
+            (router for router in routers if router.name == option2), None)
+
+        if router1 and router2:
+            connections.append((option1, option2))
+        else:
+            logging.info("Invalid router name. Please try again.")
+
+        
+    create_default_connections()
+    for router in routers:
+        router.start()
 
 
 if __name__ == "__main__":
