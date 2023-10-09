@@ -71,6 +71,9 @@ def create_default_connections():
         for router in routers:
             if router.name == connect[0]:
                 router.add_client(real_address[0], server_addr)
+                #router.add_client(router.get_server(), server_addr)
+                # switch these for different amount of interfaces,
+                # real_adress[0] specifies new interface for every client connection
                 del real_address[0]
 
 def main():
