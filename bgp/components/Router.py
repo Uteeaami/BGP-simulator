@@ -8,6 +8,7 @@ from bgp.components.RouterStates import RouterStates
 from bgp.components.RoutingTable import RoutingTable
 from bgp.components.Server import Server
 
+
 class Router(threading.Thread):
     def __init__(self, name, id, AS):
         super().__init__()
@@ -17,8 +18,8 @@ class Router(threading.Thread):
         self.AS = AS
         self.neighbor_ASS = []
         self.client = []
-        self.routingtable = RoutingTable
-        self.server = "initialize here only"
+        self.routingtable = RoutingTable()
+        self.server = None     # Tämä on servun IP-osoite
         self.state = RouterStates.OFFLINE
         self.neighbours = []
 
@@ -36,7 +37,10 @@ class Router(threading.Thread):
 
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
-        # self.routingtable.add_connection(self.id, client_addr, server_addr)
+
+    def add_routing_table_entry(self, neighbor_router):
+        self.routingtable.add_route(
+            self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
 
     def set_server(self, server_addr):
         self.server = server_addr
@@ -62,7 +66,7 @@ class Router(threading.Thread):
         ServerThread.set_parent(self)
         ServerThread.start()
         time.sleep(1)
-        #ServerThread.set_msg("asd")
+        # ServerThread.set_msg("asd")
 
         for cli in self.client:
             time.sleep(1)

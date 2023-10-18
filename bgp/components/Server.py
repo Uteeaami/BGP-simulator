@@ -9,7 +9,6 @@ class Server(threading.Thread):
         self.parent
         self.bind_addr
 
-    # huono tapa tehdä, olio-ohjelmoinnin jatkokurssista 1
     def set_parent(self, parent):
         self.parent = parent
 
