@@ -6,8 +6,8 @@ from bgp.components.Echohandler import Echohandler
 
 class Server(threading.Thread):
     def __init___(self):
-        self.parent = parent
-        self.bind_addr = bind_addr
+        self.parent
+        self.bind_addr
 
     def set_parent(self, parent):
         self.parent = parent
