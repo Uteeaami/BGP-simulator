@@ -27,4 +27,4 @@ class Client(threading.Thread):
         while True:
             msg = sock.recv(1024)
             time.sleep(5)
-            BGP_FSM(sock)    
+            BGP_FSM(sock)
