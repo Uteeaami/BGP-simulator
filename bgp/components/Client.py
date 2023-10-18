@@ -6,7 +6,7 @@ from bgp.components.BgpFunctions import BGP_FSM
 
 class Client(threading.Thread):
     def __init___(self, bind_addr, target_addr):
-        self.parent = parent
+        self.parent
         self.bind_addr = bind_addr
         self.target_addr = target_addr
 
