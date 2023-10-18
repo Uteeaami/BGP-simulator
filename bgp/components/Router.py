@@ -8,6 +8,7 @@ from bgp.components.RouterStates import RouterStates
 from bgp.components.RoutingTable import RoutingTable
 from bgp.components.Server import Server
 
+
 class Router(threading.Thread):
     def __init__(self, name, id, AS):
         super().__init__()
@@ -16,13 +17,13 @@ class Router(threading.Thread):
         self.AS = AS
         self.client = []
         self.routingtable = RoutingTable()
-        self.server = "initialize here only" # Tämä on servun IP-osoite
+        self.server = None     # Tämä on servun IP-osoite
         self.state = RouterStates.OFFLINE
         self.neighbours = []
 
     def __str__(self):
         return f"Router {self.name}"
-    
+
     def add_neighbour_router(self, neighbour):
         self.neighbours.append(neighbour)
 
@@ -30,7 +31,8 @@ class Router(threading.Thread):
         self.client.append((client_addr, server_addr))
 
     def add_routing_table_entry(self, neighbor_router):
-        self.routingtable.add_route(self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
+        self.routingtable.add_route(
+            self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
 
     def set_server(self, server_addr):
         self.server = server_addr
@@ -52,7 +54,7 @@ class Router(threading.Thread):
         ServerThread.set_parent(self)
         ServerThread.start()
         time.sleep(1)
-        #ServerThread.set_msg("asd")
+        # ServerThread.set_msg("asd")
 
         i = 1
         for cli in self.client:
@@ -68,9 +70,9 @@ class Router(threading.Thread):
             i += 1
 
         while True:
-            time.sleep(random.randint(15,20))
+            time.sleep(random.randint(15, 20))
 
-            #print(self.waiting_response)
-            #print("Active", self.name)
-            #print("connections", self.tcp_connections)
-            #break
+            # print(self.waiting_response)
+            # print("Active", self.name)
+            # print("connections", self.tcp_connections)
+            # break

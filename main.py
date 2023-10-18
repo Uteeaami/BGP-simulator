@@ -12,8 +12,9 @@ For example the IP_addresses, interface names etc.. need to be randomized.
 with open("config.toml", mode="rb") as fp:
     config = tomli.load(fp)
 
-logging.basicConfig(format='%(message)s', encoding='utf-8', level=logging.DEBUG)
-real_address = config["real_address"];
+logging.basicConfig(format='%(message)s',
+                    encoding='utf-8', level=logging.DEBUG)
+real_address = config["real_address"]
 routers = []
 
 r1 = Router("r1", 1, "AS1")
@@ -40,11 +41,10 @@ routers.append(r10)
 
 connections = config["connections"]
 
+
 def create_default_connections():
-    servers = []
     for router in routers:
-        router.set_server(real_address[0])
-        del real_address[0]
+        add_server_address(router)
 
     for connect in connections:
         for router in routers:
@@ -56,10 +56,21 @@ def create_default_connections():
                 router.add_client(real_address[0], server_addr)
                 router.add_routing_table_entry(neighbor_router)
                 # router.add_neighbour_router(router_name)
-                #router.add_client(router.get_server(), server_addr)
+                # router.add_client(router.get_server(), server_addr)
                 # switch these for different amount of interfaces,
                 # real_adress[0] specifies new interface for every client connection
                 del real_address[0]
+
+def create_manual_connection(router, neighbor):
+    add_server_address(router)
+    router.add_client(real_address[0], neighbor.get_server())
+    router.add_routing_table_entry(neighbor)
+    del real_address[0]
+
+def add_server_address(router):
+    if not router.server:
+        router.set_server(real_address[0])
+        del real_address[0]
 
 def main():
 
@@ -75,14 +86,17 @@ def main():
             (router for router in routers if router.name == option2), None)
 
         if router1 and router2:
-            connections.append((option1, option2))
+            create_manual_connection(router1, router2)
         else:
             logging.info("Invalid router name. Please try again.")
 
-        
-    create_default_connections()
+    # Create default connections if any of the routers doesn't have connections
     for router in routers:
-        print(router.routingtable.get_route(router.server))
+        if not router.client:
+            create_default_connections()
+            break
+
+    for router in routers:
         router.start()
 
 
