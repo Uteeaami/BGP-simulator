@@ -15,7 +15,7 @@ class Router(threading.Thread):
         self.id = id
         self.AS = AS
         self.client = []
-        self.routingtable = RoutingTable
+        self.routingtable = RoutingTable()
         self.server = "initialize here only"
         self.state = RouterStates.OFFLINE
         self.neighbours = []
@@ -28,7 +28,9 @@ class Router(threading.Thread):
 
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
-        # self.routingtable.add_connection(self.id, client_addr, server_addr)
+
+    def add_table_entry(self, id, client_addr, server_addr):
+        self.routingtable.add_connection(id, client_addr, server_addr)
 
     def set_server(self, server_addr):
         self.server = server_addr
