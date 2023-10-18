@@ -19,7 +19,10 @@ class Server(threading.Thread):
     def run(self):
         print("running server:", self.bind_addr, self.parent.AS)
         handler = Echohandler
-        server_socket = ThreadingTCPServer((self.bind_addr,179), handler)
+        try:
+            server_socket = ThreadingTCPServer((self.bind_addr,179), handler)
+        except Exception as e:
+            print("CANT BIND!", self.bind_addr, e)
         server_socket.parent = self.parent
         server_socket.serve_forever()
     
