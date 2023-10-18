@@ -16,7 +16,7 @@ class Router(threading.Thread):
         self.AS = AS
         self.client = []
         self.routingtable = RoutingTable()
-        self.server = "initialize here only"
+        self.server = "initialize here only" # Tämä on servun IP-osoite
         self.state = RouterStates.OFFLINE
         self.neighbours = []
 
@@ -29,8 +29,8 @@ class Router(threading.Thread):
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
 
-    def add_table_entry(self, id, client_addr, server_addr):
-        self.routingtable.add_connection(id, client_addr, server_addr)
+    def add_routing_table_entry(self, neighbor_router):
+        self.routingtable.add_route(self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
 
     def set_server(self, server_addr):
         self.server = server_addr
