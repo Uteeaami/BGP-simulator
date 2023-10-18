@@ -1,4 +1,3 @@
-import threading
 from bgp.components.Router import Router
 import logging
 
@@ -68,9 +67,11 @@ def create_default_connections():
         for router in routers:
             if router.name == connect[1]:
                 server_addr = router.get_server()
+                # router_name = router
         for router in routers:
             if router.name == connect[0]:
                 router.add_client(real_address[0], server_addr)
+                # router.add_neighbour_router(router_name)
                 #router.add_client(router.get_server(), server_addr)
                 # switch these for different amount of interfaces,
                 # real_adress[0] specifies new interface for every client connection
@@ -97,6 +98,7 @@ def main():
         
     create_default_connections()
     for router in routers:
+        print(router.name, "table", router.routingtable)
         router.start()
 
 

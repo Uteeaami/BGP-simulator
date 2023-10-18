@@ -3,24 +3,10 @@ import random
 import threading
 import socket
 import time
-import struct
 from bgp.components.Client import Client
 from bgp.components.RouterStates import RouterStates
 from bgp.components.RoutingTable import RoutingTable
 from bgp.components.Server import Server
-
-
-# APUA seuraaviin --> miten saada parent paremmin luokalle
-
-# olisi hienoa jos server ja clientti molemmat voisi käyttää samaa logiikkaa, en oo vielä varma toteutuksesta =(
-# Clientti kutsuu funktiota muuttujalla sock, Server: self.request
-def BGP_FSM(self):
-    self.send(struct.pack("!13s", b"1st. BGP msg")) # implement proper BGP msg here
-    #msg = self.recv(1024)
-
-def BGP_DECODER(msg):
-    return True
-
 
 class Router(threading.Thread):
     def __init__(self, name, id, AS):
@@ -32,13 +18,18 @@ class Router(threading.Thread):
         self.routingtable = RoutingTable
         self.server = "initialize here only"
         self.state = RouterStates.OFFLINE
+        self.neighbours = []
 
     def __str__(self):
         return f"Router {self.name}"
+    
+    def add_neighbour_router(self, neighbour):
+        self.neighbours.append(neighbour)
 
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
-    
+        # self.routingtable.add_connection(self.id, client_addr, server_addr)
+
     def set_server(self, server_addr):
         self.server = server_addr
 
@@ -72,11 +63,11 @@ class Router(threading.Thread):
             ClientThread.set_bind_addr(client_addr)
             ClientThread.set_target_addr(server_addr)
             ClientThread.start()
-            i += 1 
+            i += 1
 
         while True:
             time.sleep(random.randint(15,20))
-            
+
             #print(self.waiting_response)
             #print("Active", self.name)
             #print("connections", self.tcp_connections)

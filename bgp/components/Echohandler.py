@@ -1,6 +1,6 @@
 from socketserver import BaseRequestHandler
 import time
-from bgp.components.Router import BGP_DECODER, BGP_FSM
+from bgp.components.BgpFunctions import *
 
 from bgp.components.RouterStates import RouterStates
 

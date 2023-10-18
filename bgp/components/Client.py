@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-from bgp.components.Router import BGP_FSM
+from bgp.components.BgpFunctions import BGP_FSM
 
 
 class Client(threading.Thread):
