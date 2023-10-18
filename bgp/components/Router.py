@@ -1,53 +1,88 @@
-import logging
-from bgp.globals import *
-from bgp.components.Interface import Interface
+import time
+import random
+import threading
+import socket
+import time
+from bgp.components.Client import Client
+from bgp.components.RouterStates import RouterStates
+from bgp.components.RoutingTable import RoutingTable
+from bgp.components.Server import Server
 
 
-class Router:
+class Router(threading.Thread):
     def __init__(self, name, id, AS):
-        self.id = id
+        super().__init__()
         self.name = name
+        self.id = id
+        self.BGPid = 0
         self.AS = AS
-        self.interfaces = []
-        self.connections = []
-        self.tcp_connections = []
+        self.neighbor_ASS = []
+        self.client = []
+        self.routingtable = RoutingTable()
+        self.server = None     # Tämä on servun IP-osoite
+        self.state = RouterStates.OFFLINE
+        self.neighbours = []
 
     def __str__(self):
         return f"Router {self.name}"
+    
+    def set_BGPid(self, BGPid):
+        self.BGPid = BGPid
 
-    def add_interface(self, interface):
-        self.interfaces.append(interface)
+    def append_neighbor_ASS(self, ASS):
+        self.neighbor_ASS.append(ASS)
 
-    def add_connection(self, router):
-        existing_interface = next((interface for interface in self.interfaces if
-                                   interface.name == f"i{self.id}.{router.id}" and
-                                   interface.ip_address == f"10.0.{self.id}.{router.id}"),
-                                  None)
+    def add_neighbour_router(self, neighbour):
+        self.neighbours.append(neighbour)
 
-        if existing_interface:
-            new_interface = existing_interface
-        else:
-            new_interface = Interface(
-                f"i{self.id}.{router.id}", f"10.0.{self.id}.{router.id}", self.AS)
-            self.add_interface(new_interface)
+    def add_client(self, client_addr, server_addr):
+        self.client.append((client_addr, server_addr))
 
-        if router not in self.connections:
-            self.connections.append(router)
-        else:
-            logging.info("Connection already exists")
+    def add_routing_table_entry(self, neighbor_router):
+        self.routingtable.add_route(
+            self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
 
-    def add_tcp_connection(self, router):
-        if router not in self.tcp_connections:
-            self.tcp_connections.append(router)
-        else:
-            logging.info(f"TCP connection to {router.name} already exists.")
+    def set_server(self, server_addr):
+        self.server = server_addr
 
-    def log_info(self):
-            logging.info(f"########### {self.name} Info ###########")
-            logging.info("Interfaces:")
-            for interface in self.interfaces:
-                logging.info(interface)
-            logging.info("Connections:")
-            for connection in self.connections:
-                logging.info(f" - {connection.name}")
+    def get_server(self):
+        return self.server
 
+    def send_update(self):
+        print("asd")
+
+    # one bgp fsm per connection -> selvitä miten toteuttaa fiksusti tilakoneet serverin threadatussa tcp
+    # handlerissä. Jos tilakone lähtisisi päälle pelkästä server luokasta olisi tilakoneita vain yksi per palvelin
+
+    def run(self):
+        BGPid = random.randint(0, 4294967295)
+        self.set_BGPid(BGPid)
+        if len(self.client) > 0:
+            print("client connections:", self.name, self.client)
+        print("server:", self.name, self.server)
+
+        ServerThread = Server()
+        ServerThread.set_bind_addr(self.server)
+        ServerThread.set_parent(self)
+        ServerThread.start()
+        time.sleep(1)
+        # ServerThread.set_msg("asd")
+
+        for cli in self.client:
+            time.sleep(1)
+            client_port = random.randint(1024, 65535)
+            client_addr = (cli[0], client_port)
+            server_addr = (cli[1], 179)
+            ClientThread = Client()
+            ClientThread.set_parent(self)
+            ClientThread.set_bind_addr(client_addr)
+            ClientThread.set_target_addr(server_addr)
+            ClientThread.start()
+
+        while True:
+            time.sleep(5)
+            print(self.neighbor_ASS)
+            #print(self.waiting_response)
+            #print("Active", self.name)
+            #print("connections", self.tcp_connections)
+            #break
