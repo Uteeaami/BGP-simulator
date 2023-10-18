@@ -1,1 +1,4 @@
-__pycache__
+requirements.txt
+.dockerignore
+
+__pycache__/

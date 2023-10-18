@@ -50,11 +50,11 @@ def create_default_connections():
         for router in routers:
             if router.name == connect[1]:
                 server_addr = router.get_server()
-                # router_name = router
+                neighbor_router = router
         for router in routers:
             if router.name == connect[0]:
                 router.add_client(real_address[0], server_addr)
-                router.add_table_entry(router.id, real_address[0], server_addr)
+                router.add_routing_table_entry(neighbor_router)
                 # router.add_neighbour_router(router_name)
                 #router.add_client(router.get_server(), server_addr)
                 # switch these for different amount of interfaces,
@@ -82,6 +82,7 @@ def main():
         
     create_default_connections()
     for router in routers:
+        print(router.routingtable.get_route(router.server))
         router.start()
 
 
