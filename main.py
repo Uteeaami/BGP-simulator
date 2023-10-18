@@ -1,5 +1,6 @@
 from bgp.components.Router import Router
 import logging
+import tomli
 
 """
 Routers have n interfaces that are the independent "connections?" between the routers
@@ -8,17 +9,11 @@ For example the IP_addresses, interface names etc.. need to be randomized.
 
 """
 
+with open("config.toml", mode="rb") as fp:
+    config = tomli.load(fp)
 
 logging.basicConfig(format='%(message)s', encoding='utf-8', level=logging.DEBUG)
-
-real_address = ["192.168.0.106", "192.168.0.107", "192.168.0.108",
-                "192.168.0.109", "192.168.0.103",
-                "192.168.0.111", "192.168.0.112", "192.168.0.104",
-                "192.168.0.113", "192.168.0.114", "192.168.0.115",
-                "192.168.0.116", "192.168.0.119", "192.168.0.120",
-                "192.168.0.121", "192.168.0.122", "192.168.0.123",
-                "192.168.0.124", "192.168.0.125", "192.168.0.126",
-                ]
+real_address = config["real_address"];
 routers = []
 
 r1 = Router("r1", 1, "AS1")
@@ -43,22 +38,10 @@ routers.append(r8)
 routers.append(r9)
 routers.append(r10)
 
-connections = [
-        ("r1", "r2"),
-        ("r1", "r3"),
-        ("r2", "r4"),
-        ("r3", "r6"),
-        ("r5", "r6"),
-        ("r6", "r8"),
-        ("r7", "r1"),
-        ("r9", "r4"),
-        ("r10", "r5"),
-    ]
+connections = config["connections"]
 
 def create_default_connections():
-
     servers = []
-
     for router in routers:
         router.set_server(real_address[0])
         del real_address[0]
