@@ -21,3 +21,23 @@ class RoutingTable:
 
     def get_route(self, prefix):
         return self.routing_table.get(prefix)
+    
+    def __str__(self):
+        table_str = "BGP Routing Table\n"
+        table_str += "{:<20} {:<15} {:<15} {:<10} {:<10} {:<15} {:<15}\n".format(
+            "Network", "Next Hop", "AS Path", "Origin", "Local Pref", "MED", "Neighbor AS"
+        )
+        
+        for prefix, routes in self.routing_table.items():
+            for route in routes:
+                table_str += "{:<20} {:<15} {:<15} {:<10} {:<10} {:<15} {:<15}\n".format(
+                    prefix,
+                    route["next_hop"],
+                    route["as_path"],
+                    route["origin"],
+                    route["local_pref"],
+                    route["med"],
+                    route["neighbor_as"]
+                )
+
+        return table_str
