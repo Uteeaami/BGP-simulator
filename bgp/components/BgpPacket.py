@@ -1,13 +1,6 @@
 import struct
 import binascii
 
-# function structure for receiving messages on AS could be something like this:
-#   receive_msg():
-#       this_is_first_message == True:     # pseudo
-#           receive_open():
-#
-# different conditions for different messages as determined by the protocol and AS needs
-
 def construct_header(msglen, msgtype):
     # https://datatracker.ietf.org/doc/html/rfc4271#section-4.1
     # header MARKER field always set to all ones
@@ -47,7 +40,6 @@ def create_open(myAS, holdtime, BGPid, optparam):
     format = '!BHHL'
     openmsg = struct.pack(format, version, myAS, holdtime, BGPid)
 
-
     if optparam != 0:
         octets = octets_required(len(optparam))
         openmsg += octets.to_bytes(1, byteorder='big')
@@ -57,16 +49,11 @@ def create_open(myAS, holdtime, BGPid, optparam):
         openmsg += length.to_bytes(1, byteorder='big')
 
     msglen = len(openmsg)
-    
-    #logging.info("msglen: ", msglen)
-    #logging.info("no header: ", binascii.hexlify(openmsg))
     header = construct_header(msglen, 1)
     output = header + openmsg
-    #logging.info("openmsg bytes: ", output)
-    #logging.info("opemmsg hexed: ", binascii.hexlify(output))
     return output
 
-def create_update(wdroutes, PATHatbrs, NLRI):
+def create_update(wdroutes, PATHattr, NLRI):
     # NLRI, Network Layer Reachability Information is not encoded explicitly, but can be calculated as:
     # UPDATE message Length - 23 - Total Path Attributes Length - Withdrawn Routes Length
     if wdroutes != 0:
@@ -76,9 +63,9 @@ def create_update(wdroutes, PATHatbrs, NLRI):
         length = 0
         updatemsg = length.to_bytes(2, byteorder='big')
 
-    if PATHatbrs != 0:
-        updatemsg += octets_required(len(PATHatbrs)).to_bytes(2, byteorder='big')
-        updatemsg += PATHatbrs
+    if PATHattr != 0:
+        updatemsg += octets_required(len(PATHattr)).to_bytes(2, byteorder='big')
+        updatemsg += PATHattr
     else:
         length = 0
         updatemsg += length.to_bytes(2, byteorder='big')
@@ -89,11 +76,6 @@ def create_update(wdroutes, PATHatbrs, NLRI):
     msglen = len(updatemsg)
     header = construct_header(msglen, 2)
     output = header + updatemsg
-    #logging.info("updatemsg bytes: ", output)
-    #logging.info("only_____header: ", binascii.hexlify(header))
-    #logging.info("updatemsg hexed: ", binascii.hexlify(output))
-
-    output = updatemsg
     return output
 
 def create_keepalive():

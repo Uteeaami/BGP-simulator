@@ -51,9 +51,6 @@ class Router(threading.Thread):
     def send_update(self):
         print("asd")
 
-    # one bgp fsm per connection -> selvitä miten toteuttaa fiksusti tilakoneet serverin threadatussa tcp
-    # handlerissä. Jos tilakone lähtisisi päälle pelkästä server luokasta olisi tilakoneita vain yksi per palvelin
-
     def run(self):
         BGPid = random.randint(0, 4294967295)
         self.set_BGPid(BGPid)
@@ -81,7 +78,7 @@ class Router(threading.Thread):
 
         while True:
             time.sleep(5)
-            print(self.neighbor_ASS)
+            print(self.name, "has", self.neighbor_ASS)
             #print(self.waiting_response)
             #print("Active", self.name)
             #print("connections", self.tcp_connections)
