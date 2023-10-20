@@ -1,4 +1,5 @@
 requirements.txt
+config_win.toml
 .dockerignore
-
+env/
 __pycache__/

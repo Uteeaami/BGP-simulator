@@ -32,12 +32,15 @@ class Router(threading.Thread):
     def append_neighbor_ASS(self, ASS):
         self.neighbor_ASS.append(ASS)
 
+    # Probably not needed not 100% sure.
     def add_neighbour_router(self, neighbour):
         self.neighbours.append(neighbour)
 
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
 
+    # To add an entry, only neighbor router is needed
+    # Define other functions so that in the end this function will be called
     def add_routing_table_entry(self, neighbor_router):
         self.routingtable.add_route(
             self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)

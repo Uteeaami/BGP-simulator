@@ -97,6 +97,7 @@ def main():
             break
 
     for router in routers:
+        print(router.routingtable)
         router.start()
 
 
