@@ -20,6 +20,8 @@ class Router(threading.Thread):
         self.client = []
         self.routingtable = RoutingTable()
         self.server = None     # Tämä on servun IP-osoite
+        self.instances_n = 0
+        self.instances = 0
         self.state = RouterStates.OFFLINE
         self.neighbours = []
 
@@ -78,6 +80,7 @@ class Router(threading.Thread):
             ClientThread.set_bind_addr(client_addr)
             ClientThread.set_target_addr(server_addr)
             ClientThread.start()
+            self.instances += 1
 
         while True:
             time.sleep(5)

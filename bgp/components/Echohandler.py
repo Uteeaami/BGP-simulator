@@ -7,6 +7,7 @@ from bgp.components.RouterStates import RouterStates
 
 class Echohandler(BaseRequestHandler):
     def handle(self):
+        self.server.parent.instances += 1
         #print(self.server.parent)
         self.state = RouterStates.CONNECT
         print(f'Connected: {self.client_address} to {self.server.parent}')
