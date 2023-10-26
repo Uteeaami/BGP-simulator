@@ -20,8 +20,8 @@ class Router(threading.Thread):
         self.client = []
         self.routingtable = RoutingTable()
         self.server = None     # Tämä on servun IP-osoite
-        self.instances_n = 0
-        self.instances = 0
+        self.instances_n = 0   # Nämä muuttujat 
+        self.instances = 0     # ^^
         self.state = RouterStates.OFFLINE
         self.neighbours = []
 
@@ -57,6 +57,7 @@ class Router(threading.Thread):
         print("asd")
 
     def run(self):
+        time.sleep(random.randint(0,5))
         BGPid = random.randint(0, 4294967295)
         self.set_BGPid(BGPid)
         if len(self.client) > 0:
