@@ -1,4 +1,5 @@
 import struct
+import socket
 import binascii
 
 def construct_header(msglen, msgtype):
@@ -53,9 +54,17 @@ def create_open(myAS, holdtime, BGPid, optparam):
     output = header + openmsg
     return output
 
-def create_update(wdroutes, PATHattr, NLRI):
+# https://stackoverflow.com/a/13294427
+def ip2int(addr):
+    return struct.unpack("!I", socket.inet_aton(addr))[0]
+# https://stackoverflow.com/a/13294427
+
+def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
+    # oletuksia: updateja kutsutaan aina ja vain aina pathattribuuteilla, wdroutes ja NLRI atm vain kosmeettisia
+
     # NLRI, Network Layer Reachability Information is not encoded explicitly, but can be calculated as:
     # UPDATE message Length - 23 - Total Path Attributes Length - Withdrawn Routes Length
+    # parameter types AS_PATH = [], ORIGIN int, NEXT_HOP string
     if wdroutes != 0:
         updatemsg = octets_required(len(wdroutes)).to_bytes(2, byteorder='big')
         updatemsg += wdroutes
@@ -63,12 +72,46 @@ def create_update(wdroutes, PATHattr, NLRI):
         length = 0
         updatemsg = length.to_bytes(2, byteorder='big')
 
-    if PATHattr != 0:
-        updatemsg += octets_required(len(PATHattr)).to_bytes(2, byteorder='big')
-        updatemsg += PATHattr
-    else:
+    if AS_PATH == 0 and ORIGIN == 0 and NEXT_HOP == 0:
         length = 0
         updatemsg += length.to_bytes(2, byteorder='big')
+
+    else: 
+
+    # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
+    # https://www.ciscopress.com/articles/article.asp?p=2738462&seqNum=2
+    # Each path attribute is a triple
+    # <attribute type, attribute length, attribute value> of variable length.
+        
+        # attr_flag_2octet = 0b01010000 + type # will not be needed
+        ORIGIN_type = 0b0100000000000001
+        AS_PATH_type = 0b0100000000000010  
+        NEXT_HOP_type = 0b0100000000000011
+    
+        attr = ORIGIN_type.to_bytes(2, byteorder = 'big')
+        attr += int(1).to_bytes(1, byteorder = 'big') # ORIGIN length always 1
+        attr += ORIGIN.to_bytes(1, byteorder = 'big')
+        updatemsg += attr   
+
+    # The path segment value field contains one or more AS numbers, 
+    # each encoded as a 2-octet length field.
+        path = b''
+        length = 0
+        for AS in AS_PATH:
+            path += AS.to_bytes(2, byteorder = 'big')
+            length += 1
+        AS_PATH = int(2).to_bytes(1, byteorder = 'big') 
+        AS_PATH += length.to_bytes(1, byteorder = 'big') 
+        AS_PATH += path
+        attr = AS_PATH_type.to_bytes(2, byteorder = 'big')
+        attr += octets_required(len(path)).to_bytes(1, byteorder = 'big')
+        attr += path
+        updatemsg += attr
+
+        attr = NEXT_HOP_type.to_bytes(2, byteorder= 'big')
+        attr += int(4).to_bytes(1, byteorder = 'big') # NEXT_HOP length always 4 octets (32bit IPv4)
+        attr += ip2int(NEXT_HOP).to_bytes(4, byteorder = 'big')
+        updatemsg += attr
 
     if NLRI != 0:
         updatemsg += NLRI
@@ -84,5 +127,9 @@ def create_keepalive():
 #asd = 0
 #optparam = asd.to_bytes(5, byteorder="big")
 #open(1, 10, 0, optparam)
-#update(0,optparam,0)
+#ORIGIN = 1
+#AS_PATH = [1, 2, 3]
+#NEXT_HOP = "1.1.1.1"
+#print(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0))
+#print(create_open(16, 7, 255, 0))
 #logging.info (binascii.hexlify(open(255, 0, 1028, 0)))

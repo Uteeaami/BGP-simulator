@@ -4,6 +4,8 @@ import time
 import struct
 # Clientti kutsuu funktiota muuttujalla sock, Server: self.request
 
+
+
 def BGP_FSM(self, parent):
     first = True
 
@@ -25,32 +27,31 @@ def BGP_FSM(self, parent):
         sendable = create_keepalive()
         self.send(sendable)
         msg = self.recv(1024)
-        if msg[18] == 2: # 19. merkitsevin tavu = headerin määrittämä type. 2 = UPDATE
-            print("receive update")
         if parent.instances_n == parent.instances and first == True:
-            print("sending first updates")
-            #first_update(self, parent, this_neighbor_AS)
+            #print("sending first updates")
+            #print("I AM AS: ", id, "I HAVE", parent.instances_n, "CONNECTION(S)")
+            first_update(self, parent, this_neighbor_AS)
             first = False
+            # KORJAA
+        if msg[18] == 2: # 19. merkitsevin tavu = headerin määrittämä type. 2 = UPDATE
+                print("I AM:", parent.id, "receive update")
+
 
         time.sleep(holdtime/3)  # "A reasonable maximum time between KEEPALIVE messages would be one third of the Hold Time interval."
 
-    def first_update(self, parent, this_neighbor_AS):
-        attr_flag_octet = 0b01000000
-        attr_flag_2octet = 0b01010000
-        # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
-        ORIGIN = 1
-        NEXT_HOP = parent.server
-        # taio logiikkaa AS_PATH
-        AS_PATH_SEQMENTS = []
-        # Each AS path segment is represented by a triple
-        # <path segment type, path segment length, path segment value>.
-        PATH_SEQMENT_TYPE = 2 # sequence, sequence on järjestetty sarja
-        for AS in parent.neighbor_ASS:
-            if AS != this_neighbor_AS:
-                PATH_SEQMENT_VALUE = id.to_bytes(2, byteorder="big") #    The path segment value field contains one or more AS
-                PATH_SEQMENT_VALUE += AS.to_bytes(2, byterorder="big")  #  numbers, each encoded as a 2-octet length field.
-                PATH_SEQMENT_LENGTH = int(2).to_bytes(1, byterorder="big") # aspath AS n = 2
-                AS_PATH_SEQMENTS.append((PATH_SEQMENT_TYPE, PATH_SEQMENT_LENGTH, PATH_SEQMENT_VALUE))
-
-
-        sendable = create_update(0, 0, 0)
+def first_update(self, parent, this_neighbor_AS):
+    # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
+    ORIGIN = 1
+    NEXT_HOP = parent.server
+    # taio logiikkaa AS_PATH
+    # Each AS path segment is represented by a triple
+    # <path segment type, path segment length, path segment value>.
+    for AS in parent.neighbor_ASS:
+        AS_PATH = []
+        if AS != this_neighbor_AS:
+            AS_PATH.append(parent.id)
+            AS_PATH.append(AS)
+            sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)
+            #print(sendable)
+            self.send(sendable)
+            print(AS_PATH, "!!!!!!!!!")
