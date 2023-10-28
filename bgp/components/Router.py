@@ -85,7 +85,7 @@ class Router(threading.Thread):
 
         while True:
             time.sleep(5)
-            print(self.name, "has", self.neighbor_ASS)
+            #print(self.name, "has", self.neighbor_ASS)
             #print(self.waiting_response)
             #print("Active", self.name)
             #print("connections", self.tcp_connections)

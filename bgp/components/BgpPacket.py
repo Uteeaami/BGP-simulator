@@ -90,8 +90,7 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
     
         attr = ORIGIN_type.to_bytes(2, byteorder = 'big')
         attr += int(1).to_bytes(1, byteorder = 'big') # ORIGIN length always 1
-        attr += ORIGIN.to_bytes(1, byteorder = 'big')
-        updatemsg += attr   
+        attr += ORIGIN.to_bytes(1, byteorder = 'big') 
 
     # The path segment value field contains one or more AS numbers, 
     # each encoded as a 2-octet length field.
@@ -103,14 +102,15 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
         AS_PATH = int(2).to_bytes(1, byteorder = 'big') 
         AS_PATH += length.to_bytes(1, byteorder = 'big') 
         AS_PATH += path
-        attr = AS_PATH_type.to_bytes(2, byteorder = 'big')
+        attr += AS_PATH_type.to_bytes(2, byteorder = 'big')
         attr += octets_required(len(path)).to_bytes(1, byteorder = 'big')
         attr += path
-        updatemsg += attr
 
-        attr = NEXT_HOP_type.to_bytes(2, byteorder= 'big')
+        attr += NEXT_HOP_type.to_bytes(2, byteorder= 'big')
         attr += int(4).to_bytes(1, byteorder = 'big') # NEXT_HOP length always 4 octets (32bit IPv4)
         attr += ip2int(NEXT_HOP).to_bytes(4, byteorder = 'big')
+
+        updatemsg += len(attr).to_bytes(2, byteorder = 'big')
         updatemsg += attr
 
     if NLRI != 0:
@@ -122,7 +122,7 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
     return output
 
 def create_keepalive():
-    return construct_header(19, 4)
+    return construct_header(0, 4)
 
 #asd = 0
 #optparam = asd.to_bytes(5, byteorder="big")
@@ -130,6 +130,7 @@ def create_keepalive():
 #ORIGIN = 1
 #AS_PATH = [1, 2, 3]
 #NEXT_HOP = "1.1.1.1"
-#print(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0))
+#print(binascii.hexlify(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
+#print((create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
 #print(create_open(16, 7, 255, 0))
 #logging.info (binascii.hexlify(open(255, 0, 1028, 0)))
