@@ -46,26 +46,46 @@ def receiver(self, parent):
     proper_updates = []
     msg2 = b''
     while True:
-        dubl = False
+        #dubl = False
         msg = self.recv(4096)
-        if msg == msg2 and msg[18] != 4:
+        #if msg == msg2 and msg[18] != 4:
             #print("SAMMA HÄR")
-            dubl = True
+            #dubl = True
         msg2 = msg
         #print("receiving:", binascii.hexlify(msg[16:18]), len(msg), int.from_bytes(msg[16:18], byteorder='big'), binascii.hexlify(msg))
         msglen = int.from_bytes(msg[16:18], byteorder='big')
         if len(msg) > msglen:
             msg = msg[:msglen]
-        if msg[18] == 2 and dubl == False and msg not in proper_updates:
+        if msg[18] == 2: # and dubl == False and msg not in proper_updates:
             # TODO: handle updates here, unpack, append own AS to AS_PATH, NEXT_HOP = parent.server and send to peers
-            proper_updates.append(msg)
-            print(binascii.hexlify(msg))
+            #proper_updates.append(msg)
+            #print(binascii.hexlify(msg))
+            handle_update(msg, self, parent)
+
+# https://stackoverflow.com/a/13294427
+def int2ip(addr):
+    return socket.inet_ntoa(struct.pack("!I", addr))
+
+def handle_update(msg, self, parent):
+    ORIGIN_type = 0b0100000000000001
+    AS_PATH_type = 0b0100000000000010  
+    NEXT_HOP_type = 0b0100000000000011
+
+    wd_len = int.from_bytes(msg[19:21], byteorder='big')
+    attr_len = int.from_bytes(msg[21 + wd_len :23 + wd_len], byteorder='big')
+    attr = msg[23 + wd_len : 23 + attr_len + wd_len]
+    nlri = msg[23 + attr_len + wd_len : ]
+
+    print(binascii.hexlify(msg), attr_len, binascii.hexlify(attr), binascii.hexlify(nlri))
 
 def first_updates(self, parent, this_neighbor_AS):
     # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
     queue = []
     ORIGIN = 1
     NEXT_HOP = parent.server
+    length = 32
+    prefix = self.getpeername()[0]
+    NLRI = ((length, prefix))
     # Each AS path segment is represented by a triple
     # <path segment type, path segment length, path segment value>.
     for AS in parent.neighbor_ASS:
@@ -73,9 +93,9 @@ def first_updates(self, parent, this_neighbor_AS):
         if AS != this_neighbor_AS:
             AS_PATH.append(parent.id)
             AS_PATH.append(AS)
-            sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)
+            sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI)
             #print(sendable)
             queue.append(sendable)
-            self.send(sendable)
+            #self.send(sendable)
             #print(AS_PATH, "AS_PATH to:", this_neighbor_AS)
     return queue

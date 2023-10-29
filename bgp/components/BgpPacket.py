@@ -60,11 +60,11 @@ def ip2int(addr):
 # https://stackoverflow.com/a/13294427
 
 def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
-    # oletuksia: updateja kutsutaan aina ja vain aina pathattribuuteilla, wdroutes ja NLRI atm vain kosmeettisia
+    # oletuksia: updateja kutsutaan aina ja vain aina pathattribuuteilla VAIN yksi NLRI osoite, wdroutes kosmeettinen
 
     # NLRI, Network Layer Reachability Information is not encoded explicitly, but can be calculated as:
     # UPDATE message Length - 23 - Total Path Attributes Length - Withdrawn Routes Length
-    # parameter types AS_PATH = [], ORIGIN int, NEXT_HOP string
+    # parameter types AS_PATH list, ORIGIN int, NEXT_HOP string, NLRI tuple
     if wdroutes != 0:
         updatemsg = octets_required(len(wdroutes)).to_bytes(2, byteorder='big')
         updatemsg += wdroutes
@@ -114,7 +114,10 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
         updatemsg += attr
 
     if NLRI != 0:
-        updatemsg += NLRI
+        length = NLRI[0].to_bytes(1, byteorder = 'big')
+        prefix = ip2int(NLRI[1]).to_bytes(4, byteorder = 'big')
+        updatemsg += length
+        updatemsg += prefix
 
     msglen = len(updatemsg)
     header = construct_header(msglen, 2)
