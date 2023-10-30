@@ -60,7 +60,7 @@ def ip2int(addr):
 # https://stackoverflow.com/a/13294427
 
 def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
-    # oletuksia: updateja kutsutaan aina ja vain aina pathattribuuteilla VAIN yksi NLRI osoite, wdroutes kosmeettinen
+    # oletuksia: updateja kutsutaan aina ja vain aina pathattribuuteilla VAIN yksi NLRI osoite, wdroutes kosmeettinen atm
 
     # NLRI, Network Layer Reachability Information is not encoded explicitly, but can be calculated as:
     # UPDATE message Length - 23 - Total Path Attributes Length - Withdrawn Routes Length
@@ -84,11 +84,11 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
     # <attribute type, attribute length, attribute value> of variable length.
         
         # attr_flag_2octet = 0b01010000 + type # will not be needed
-        ORIGIN_type = 0b0100000000000001
-        AS_PATH_type = 0b0100000000000010  
-        NEXT_HOP_type = 0b0100000000000011
+        ORIGIN_t = 0b0100000000000001
+        AS_PATH_t = 0b0100000000000010  
+        NEXT_HOP_t = 0b0100000000000011
     
-        attr = ORIGIN_type.to_bytes(2, byteorder = 'big')
+        attr = ORIGIN_t.to_bytes(2, byteorder = 'big')
         attr += int(1).to_bytes(1, byteorder = 'big') # ORIGIN length always 1
         attr += ORIGIN.to_bytes(1, byteorder = 'big') 
 
@@ -102,11 +102,11 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
         AS_PATH = int(2).to_bytes(1, byteorder = 'big') 
         AS_PATH += length.to_bytes(1, byteorder = 'big') 
         AS_PATH += path
-        attr += AS_PATH_type.to_bytes(2, byteorder = 'big')
-        attr += octets_required(len(path)).to_bytes(1, byteorder = 'big')
-        attr += path
+        attr += AS_PATH_t.to_bytes(2, byteorder = 'big')
+        attr += len(AS_PATH).to_bytes(1, byteorder = 'big') 
+        attr += AS_PATH
 
-        attr += NEXT_HOP_type.to_bytes(2, byteorder= 'big')
+        attr += NEXT_HOP_t.to_bytes(2, byteorder= 'big')
         attr += int(4).to_bytes(1, byteorder = 'big') # NEXT_HOP length always 4 octets (32bit IPv4)
         attr += ip2int(NEXT_HOP).to_bytes(4, byteorder = 'big')
 
