@@ -67,16 +67,36 @@ def int2ip(addr):
     return socket.inet_ntoa(struct.pack("!I", addr))
 
 def handle_update(msg, self, parent):
-    ORIGIN_type = 0b0100000000000001
-    AS_PATH_type = 0b0100000000000010  
-    NEXT_HOP_type = 0b0100000000000011
+    ORIGIN_t = 0b0100000000000001
+    AS_PATH_t = 0b0100000000000010
+    # AS_PATH_bigt = 0b0101000000000010
+    NEXT_HOP_t = 0b0100000000000011
 
     wd_len = int.from_bytes(msg[19:21], byteorder='big')
     attr_len = int.from_bytes(msg[21 + wd_len :23 + wd_len], byteorder='big')
     attr = msg[23 + wd_len : 23 + attr_len + wd_len]
     nlri = msg[23 + attr_len + wd_len : ]
 
-    print(binascii.hexlify(msg), attr_len, binascii.hexlify(attr), binascii.hexlify(nlri))
+    ORIGIN = 0
+    AS_PATHS = []
+    NEXT_HOP = b''
+    for octet_n in range(len(attr) - 4):
+        if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == ORIGIN_t:
+            ORIGIN = attr[octet_n + 3] # = 1, aina
+            octet_n += 3
+
+        if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == AS_PATH_t:
+            AS_PATH_s = int.from_bytes(attr[octet_n + 3 : octet_n + 4], byteorder='big')
+            # ei käytössä, oletus = 2 AS_SEQUENCE: ordered set of ASes a route in the UPDATE message has traversed
+            AS_n = int.from_bytes(attr[octet_n + 4 : octet_n + 5], byteorder='big')
+            AS_PATH = ()
+            for AS in (range(AS_n)):
+                AS_PATH += struct.unpack('!H', attr[octet_n + 5 + (AS * 2) : octet_n + 5 + ((AS + 1) * 2)])
+                #AS_PATH += (int.from_bytes(attr[octet_n + 5 + (AS * 2) : octet_n + 5 + ((AS + 1) * 2)], byteorder = 'big'))
+            AS_PATHS.append(AS_PATH)
+            print(AS_PATH)
+            octet_n += int.from_bytes(attr[octet_n + 2 : octet_n + 3], byteorder='big')
+
 
 def first_updates(self, parent, this_neighbor_AS):
     # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
