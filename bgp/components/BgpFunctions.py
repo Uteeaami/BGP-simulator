@@ -21,8 +21,9 @@ def BGP_FSM(self, parent):
     # formatin pitäisi muuttua viestin koon mukaan, tällä hetkellä olettaa että viestissä ei ole optparamia, eli vika tavu = 0
     format = "!4LHBBHHLB"
     msg = struct.unpack(format, msg)
-    parent.append_neighbor_ASS(msg[7]) # tämä antaa routerille tiedon peeraavista reitittimistä -> tietorakenteessa kaikki routerin peerit
-    this_neighbor_AS = msg[7]          # kun taas tämä on instanssin oma peeri
+    this_neighbor_AS = msg[7] # instanssin peer numero
+    this_neighbor_addr = self.getpeername()[0] # osoite
+    parent.append_neighbor_ASS((this_neighbor_AS, this_neighbor_addr))
     parent.instances_n += 1
     receiver_thread = threading.Thread(target = receiver, args = (self, parent, ))
     receiver_thread.start()
@@ -79,15 +80,20 @@ def handle_update(msg, self, parent):
 
     ORIGIN = 0
     AS_PATHS = []
-    NEXT_HOP = b''
+    NLRIS = []
+    NEXT_HOP = 0
+    total_len = len(attr)
+    # atribuuttien händläys
     for octet_n in range(len(attr) - 4):
         if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == ORIGIN_t:
             ORIGIN = attr[octet_n + 3] # = 1, aina
             octet_n += 3
+            if octet_n > total_len:
+                break
 
         if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == AS_PATH_t:
             AS_PATH_s = int.from_bytes(attr[octet_n + 3 : octet_n + 4], byteorder='big')
-            # ei käytössä, oletus = 2 AS_SEQUENCE: ordered set of ASes a route in the UPDATE message has traversed
+            # ei tarvita, oletus aina = 2 AS_SEQUENCE: ordered set of ASes a route in the UPDATE message has traversed
             AS_n = int.from_bytes(attr[octet_n + 4 : octet_n + 5], byteorder='big')
             AS_PATH = ()
             for AS in (range(AS_n)):
@@ -96,6 +102,30 @@ def handle_update(msg, self, parent):
             AS_PATHS.append(AS_PATH)
             print(AS_PATH)
             octet_n += int.from_bytes(attr[octet_n + 2 : octet_n + 3], byteorder='big')
+            if octet_n > total_len:
+                break
+
+        if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == NEXT_HOP_t:
+            # ainta 4 oktettia = 32bit ip osoite
+            NEXT_HOP = attr[octet_n + 3 : octet_n + 8]
+            NEXT_HOP = int.from_bytes(NEXT_HOP, byteorder='big')
+            NEXT_HOP = int2ip(NEXT_HOP)
+            print(NEXT_HOP)
+            octet_n += 8
+            if octet_n > total_len:
+                break
+
+    # NLRI händläys
+    nlri_len = len(nlri)
+    for n in range(int(nlri_len / 5)):
+        cidr_len = int.from_bytes(nlri[n*5 : 1 + n*5], byteorder='big')
+        # ei tarvita, oletus että aina /32 = yksi osoite, ei range
+        prefix = int.from_bytes(nlri[1 + n*5 : 7 + n*5], byteorder='big')
+        prefix = int2ip(prefix)
+        NLRIS.append(prefix)
+        print(prefix)
+
+    print("received update from:", self.getpeername()[0], "AS", AS_PATHS[0][0], ":", "advertising route(s) to:", NLRIS)
 
 
 def first_updates(self, parent, this_neighbor_AS):
@@ -103,16 +133,17 @@ def first_updates(self, parent, this_neighbor_AS):
     queue = []
     ORIGIN = 1
     NEXT_HOP = parent.server
-    length = 32
-    prefix = self.getpeername()[0]
-    NLRI = ((length, prefix))
+    cidr_len = 32
     # Each AS path segment is represented by a triple
     # <path segment type, path segment length, path segment value>.
+
     for AS in parent.neighbor_ASS:
         AS_PATH = []
-        if AS != this_neighbor_AS:
+        #print(AS[0])
+        if AS[0] != this_neighbor_AS:
             AS_PATH.append(parent.id)
-            AS_PATH.append(AS)
+            prefix = AS[1]
+            NLRI = ((cidr_len, prefix))
             sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI)
             #print(sendable)
             queue.append(sendable)
