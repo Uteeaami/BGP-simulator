@@ -7,7 +7,6 @@ import binascii
 # Clientti kutsuu funktiota muuttujalla sock, Server: self.request
 
 
-
 def BGP_FSM(self, parent):
     first = True
     queue = []
@@ -17,8 +16,8 @@ def BGP_FSM(self, parent):
     optparam = 0
     sendable = create_open(id, holdtime, BGPid, optparam)
     self.send(sendable)
-    msg = self.recv(1024)
-    # formatin pitäisi muuttua viestin koon mukaan, tällä hetkellä olettaa että viestissä ei ole optparamia, eli vika tavu = 0
+    msg = self.recv(4096)
+    # formatin pitäisi muuttua viestin koon mukaan, tällä hetkellä olettaa että open viestissä ei ole optparamia, eli vika tavu = 0
     format = "!4LHBBHHLB"
     msg = struct.unpack(format, msg)
     this_neighbor_AS = msg[7] # instanssin peer numero
@@ -28,9 +27,36 @@ def BGP_FSM(self, parent):
     receiver_thread = threading.Thread(target = receiver, args = (self, parent, ))
     receiver_thread.start()
     while True:
+        
+        if len(parent.update_queue) > 0:
+            #rand = random.randint(0, 200000)
+            #print("propagatin'", parent.id)
+            parent.lock.acquire()
+            send = True
+            index = 0
+            for update in parent.update_queue:
+                for AS in update[1]:
+                    if AS == this_neighbor_AS:
+                        send = False
+                if send == True:
+                    sendable = create_propagate_update(self, parent, update)
+                    queue.append(sendable)
+                    del parent.update_queue[index]
+                    index -= 1
+                index += 1
+
+            if send == False:
+                parent.propagate_condition += 1
+            if parent.propagate_condition == parent.instances:
+                parent.update_queue = []
+                parent.propagate_condition = 0
+
+            #print("endin'", parent.id, rand)
+            parent.lock.release()
+
         if len(queue) > 0:
             for q in queue:
-                print("sending:", binascii.hexlify(queue[0]))
+                #print("sending:", binascii.hexlify(queue[0]))
                 self.send(queue[0])
                 del queue[0]
         sendable = create_keepalive()
@@ -38,7 +64,7 @@ def BGP_FSM(self, parent):
         if parent.instances_n == parent.instances and first == True:
             #print("sending first updates")
             #print("I AM AS: ", id, "I HAVE", parent.instances_n, "CONNECTION(S)")
-            queue = first_updates(self, parent, this_neighbor_AS)
+            queue += first_updates(self, parent, this_neighbor_AS)
             first = False
             # KORJAA
         time.sleep(holdtime/3)  # "A reasonable maximum time between KEEPALIVE messages would be one third of the Hold Time interval."
@@ -70,7 +96,7 @@ def int2ip(addr):
 def handle_update(msg, self, parent):
     ORIGIN_t = 0b0100000000000001
     AS_PATH_t = 0b0100000000000010
-    # AS_PATH_bigt = 0b0101000000000010
+    # AS_PATH_bigt = 0b0101000000000010 # käytettäisi jos path attrbuutin koko yli 255, oletus ettei
     NEXT_HOP_t = 0b0100000000000011
 
     wd_len = int.from_bytes(msg[19:21], byteorder='big')
@@ -79,7 +105,6 @@ def handle_update(msg, self, parent):
     nlri = msg[23 + attr_len + wd_len : ]
 
     ORIGIN = 0
-    AS_PATHS = []
     NLRIS = []
     NEXT_HOP = 0
     total_len = len(attr)
@@ -99,34 +124,40 @@ def handle_update(msg, self, parent):
             for AS in (range(AS_n)):
                 AS_PATH += struct.unpack('!H', attr[octet_n + 5 + (AS * 2) : octet_n + 5 + ((AS + 1) * 2)])
                 #AS_PATH += (int.from_bytes(attr[octet_n + 5 + (AS * 2) : octet_n + 5 + ((AS + 1) * 2)], byteorder = 'big'))
-            AS_PATHS.append(AS_PATH)
-            print(AS_PATH)
             octet_n += int.from_bytes(attr[octet_n + 2 : octet_n + 3], byteorder='big')
             if octet_n > total_len:
                 break
 
         if int.from_bytes(attr[octet_n : octet_n + 2], byteorder='big') == NEXT_HOP_t:
-            # ainta 4 oktettia = 32bit ip osoite
-            NEXT_HOP = attr[octet_n + 3 : octet_n + 8]
+            NH_len = int.from_bytes(attr[octet_n + 2 : octet_n + 3], byteorder='big')
+            NEXT_HOP = attr[octet_n + 3 : octet_n + 3 + NH_len]
             NEXT_HOP = int.from_bytes(NEXT_HOP, byteorder='big')
             NEXT_HOP = int2ip(NEXT_HOP)
-            print(NEXT_HOP)
             octet_n += 8
             if octet_n > total_len:
                 break
 
     # NLRI händläys
     nlri_len = len(nlri)
-    for n in range(int(nlri_len / 5)):
+    for n in range(int(nlri_len / 5)): # oletus että len(cidr_len) + len(prefix) = 1 + 4 oktettia, ei välttämättä aina totta, mutta sattuu nyt olemaan
         cidr_len = int.from_bytes(nlri[n*5 : 1 + n*5], byteorder='big')
-        # ei tarvita, oletus että aina /32 = yksi osoite, ei range
+        # ei sinänsä tarvita, oletus että aina /32 = yksi osoite, ei range
         prefix = int.from_bytes(nlri[1 + n*5 : 7 + n*5], byteorder='big')
         prefix = int2ip(prefix)
-        NLRIS.append(prefix)
-        print(prefix)
+        NLRIS.append((cidr_len, prefix))
 
-    print("received update from:", self.getpeername()[0], "AS", AS_PATHS[0][0], ":", "advertising route(s) to:", NLRIS)
+    print("AS", parent.id, "received update from:", self.getpeername()[0], "AS", AS_PATH[0], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRIS)
+    recv_update = [ORIGIN, AS_PATH, NEXT_HOP, NLRIS]
+    parent.update_queue.append(recv_update)
 
+def create_propagate_update(self, parent, recv_update):
+    ORIGIN = 1
+    AS_PATH = (parent.id,) + recv_update[1]
+    NEXT_HOP = parent.server
+    NLRI = recv_update[3]
+    #print("AS", parent.id, "propagating update from:", self.getpeername()[0], "AS", AS_PATH[1], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRI)
+    sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI[0])
+    return sendable
 
 def first_updates(self, parent, this_neighbor_AS):
     # https://datatracker.ietf.org/doc/html/rfc4271#section-4.3
@@ -143,7 +174,8 @@ def first_updates(self, parent, this_neighbor_AS):
         if AS[0] != this_neighbor_AS:
             AS_PATH.append(parent.id)
             prefix = AS[1]
-            NLRI = ((cidr_len, prefix))
+            #NLRI = ((cidr_len, prefix))
+            NLRI = ((AS[0], prefix))
             sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI)
             #print(sendable)
             queue.append(sendable)
