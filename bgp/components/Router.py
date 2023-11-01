@@ -17,7 +17,10 @@ class Router(threading.Thread):
         self.BGPid = 0
         self.AS = AS
         self.neighbor_ASS = []
+        self.update_queue = []
+        self.propagate_condition = 0
         self.client = []
+        self.lock = threading.Lock()
         self.routingtable = RoutingTable()
         self.server = None     # Tämä on servun IP-osoite
         self.instances_n = 0   # Nämä muuttujat 

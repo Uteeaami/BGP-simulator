@@ -133,6 +133,7 @@ def create_keepalive():
 #ORIGIN = 1
 #AS_PATH = [1, 2, 3]
 #NEXT_HOP = "1.1.1.1"
+print(ip2int("1.0.0.1"))
 #print(binascii.hexlify(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
 #print((create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
 #print(create_open(16, 7, 255, 0))
