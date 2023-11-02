@@ -40,6 +40,7 @@ class Router(threading.Thread):
     # Probably not needed not 100% sure.
     def add_neighbour_router(self, neighbour):
         self.neighbours.append(neighbour)
+        neighbour.neighbours.append(self)
 
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
@@ -49,6 +50,11 @@ class Router(threading.Thread):
     def add_routing_table_entry(self, neighbor_router):
         self.routingtable.add_route(
             self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
+        
+    def get_neighbor_router_by_AS(self, AS):
+        for neighbor in self.neighbours:
+            if neighbor.AS.replace('AS', '') == str(AS):
+                return neighbor
 
     def set_server(self, server_addr):
         self.server = server_addr
@@ -86,10 +92,3 @@ class Router(threading.Thread):
             ClientThread.start()
             self.instances += 1
 
-        while True:
-            time.sleep(5)
-            #print(self.name, "has", self.neighbor_ASS)
-            #print(self.waiting_response)
-            #print("Active", self.name)
-            #print("connections", self.tcp_connections)
-            #break

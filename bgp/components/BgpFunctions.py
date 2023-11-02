@@ -21,8 +21,11 @@ def BGP_FSM(self, parent):
     format = "!4LHBBHHLB"
     msg = struct.unpack(format, msg)
     this_neighbor_AS = msg[7] # instanssin peer numero
-    this_neighbor_addr = self.getpeername()[0] # osoite
+    this_neighbor_addr = self.getpeername()[0] # osoiteadd_routing_table_entry
     parent.append_neighbor_ASS((this_neighbor_AS, this_neighbor_addr))
+    neighbor = parent.get_neighbor_router_by_AS(this_neighbor_AS)
+    parent.add_routing_table_entry(neighbor)
+    # parent.add_routing_table_entry()
     parent.instances_n += 1
     receiver_thread = threading.Thread(target = receiver, args = (self, parent, ))
     receiver_thread.start()
