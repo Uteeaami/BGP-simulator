@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-num_interfaces=20
+num_interfaces=50
 
 
 echo "real_address = [" > new_config.toml

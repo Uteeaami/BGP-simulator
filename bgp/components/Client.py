@@ -1,3 +1,4 @@
+import random
 import socket
 import threading
 import time
@@ -26,8 +27,9 @@ class Client(threading.Thread):
             sock.bind(self.bind_addr)
         except Exception as e:
             print("CANT BIND!", self.bind_addr, e)
+
+        time.sleep(random.randint(3,10))    
         sock.connect(self.target_addr)
         while True:
             time.sleep(5)
-            BGP_FSM(sock, self.parent)    
-
+            BGP_FSM(sock, self.parent)
