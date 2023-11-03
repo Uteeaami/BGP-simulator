@@ -1,7 +1,6 @@
 import time
 from bgp.components.Router import Router
 from ScriptRunner import run_startup_scripts
-import logging
 import tomli
 
 #USE ONLY WITH LINUX SYSTEMS
@@ -10,8 +9,6 @@ run_startup_scripts()
 with open("config.toml", mode="rb") as fp:
     config = tomli.load(fp)
 
-logging.basicConfig(format='%(message)s',
-                    encoding='utf-8', level=logging.DEBUG)
 real_address = config["real_address"]
 routers = []
 
@@ -82,7 +79,7 @@ def main():
         if router1 and router2:
             create_manual_connection(router1, router2)
         else:
-            logging.info("Invalid router name. Please try again.")
+            print("Invalid router name. Please try again.")
 
     # Create default connections if any of the routers doesn't have connections
     for router in routers:

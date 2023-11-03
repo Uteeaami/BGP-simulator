@@ -1,7 +1,16 @@
-FROM python:3.11-alpine
-COPY . /app
+
+FROM python:3.8
+
+ENV DOCKER_ENV=true
+
 WORKDIR /app
 
-RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade setuptools
-RUN pip3 install -r requirements.txt
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update && apt-get install -y uml-utilities net-tools iproute2
+
+COPY . .
+
+CMD ["python", "main.py"]

@@ -20,7 +20,6 @@ def construct_header(msglen, msgtype):
                          msglen + 19,
                          msgtype)
 
-    #logging.info("MSG LENGTH:", msglen + 19)
     return output
 
 def octets_required(paramlen):
@@ -137,4 +136,3 @@ print(ip2int("1.0.0.1"))
 #print(binascii.hexlify(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
 #print((create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
 #print(create_open(16, 7, 255, 0))
-#logging.info (binascii.hexlify(open(255, 0, 1028, 0)))
