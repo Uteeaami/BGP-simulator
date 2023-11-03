@@ -1,13 +1,11 @@
+import time
 from bgp.components.Router import Router
+from ScriptRunner import run_startup_scripts
 import logging
 import tomli
 
-"""
-Routers have n interfaces that are the independent "connections?" between the routers
-The creation of the interface and routers needs to be automated since the simulator is customizeable.
-For example the IP_addresses, interface names etc.. need to be randomized.
-
-"""
+#USE ONLY WITH LINUX SYSTEMS
+run_startup_scripts()
 
 with open("config.toml", mode="rb") as fp:
     config = tomli.load(fp)
@@ -54,11 +52,7 @@ def create_default_connections():
         for router in routers:
             if router.name == connect[0]:
                 router.add_client(real_address[0], server_addr)
-                router.add_routing_table_entry(neighbor_router)
-                # router.add_neighbour_router(router_name)
-                # router.add_client(router.get_server(), server_addr)
-                # switch these for different amount of interfaces,
-                # real_adress[0] specifies new interface for every client connection
+                router.add_neighbour_router(neighbor_router)
                 del real_address[0]
 
 def create_manual_connection(router, neighbor):
@@ -98,6 +92,9 @@ def main():
 
     for router in routers:
         router.start()
+    
+    while True:
+        time.sleep(40)
 
 
 if __name__ == "__main__":

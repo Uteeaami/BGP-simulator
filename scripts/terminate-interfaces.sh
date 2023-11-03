@@ -1,7 +1,7 @@
 #!/bin/bash
 
 start=0
-end=20
+end=50
 
 for ((i=start; i<=end; i++)); do
     ip=($i + 1)
