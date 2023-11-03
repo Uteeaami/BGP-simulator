@@ -6,7 +6,7 @@ if ! command -v pip &> /dev/null; then
     exit 1
 fi
 
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 
 if [ $? -eq 0 ]; then
     echo "Python dependencies installed successfully."
