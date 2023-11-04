@@ -49,7 +49,7 @@ class Router(threading.Thread):
     # Define other functions so that in the end this function will be called
     def add_routing_table_entry(self, neighbor_router):
         self.routingtable.add_route(
-            self.server, neighbor_router.server, "AS_PATH", neighbor_router.AS)
+            self.server, neighbor_router.server, neighbor_router.AS)
         
     def get_neighbor_router_by_AS(self, AS):
         for neighbor in self.neighbours:

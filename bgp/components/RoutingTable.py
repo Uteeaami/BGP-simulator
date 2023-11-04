@@ -5,13 +5,13 @@ class RoutingTable:
     def __init__(self):
         self.routing_table = {}
 
-    def add_route(self, prefix, next_hop, as_path, neighbor_as):
+    def add_route(self, prefix, next_hop, neighbor_as):
         if prefix not in self.routing_table:
             self.routing_table[prefix] = []
 
         self.routing_table[prefix].append({
             "next_hop": next_hop,
-            "as_path": as_path,
+            "as_path": 16386,
             "origin": "i",
             "local_pref": random.randint(0, 100),
             "med": 0,

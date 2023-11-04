@@ -65,6 +65,51 @@ def add_server_address(router):
 
 def main():
 
+    bgp_ASCII_print = """
+        ______   _______  _______         _______ _________ _______ 
+        (  ___ \ (  ____ \(  ____ )       (  ____ \\__   __/(       )
+        | (   ) )| (    \/| (    )|       | (    \/   ) (   | () () |
+        | (__/ / | |      | (____)| _____ | (_____    | |   | || || |
+        |  __ (  | | ____ |  _____)(_____)(_____  )   | |   | |(_)| |
+        | (  \ \ | | \_  )| (                   ) |   | |   | |   | |
+        | )___) )| (___) || )             /\____) |___) (___| )   ( |
+        |/ \___/ (_______)|/              \_______)\_______/|/     \|
+                                                                    
+    """
+    intro_text = "This is a project for the Protocol Processing course, created by MarkLeppi, Eikrt, and Uteeaami."
+    bgp_ASCII_connections_print = """
+    ##########################################################################################
+    #                                *DEFAULT CONNECTIONS*                                    #
+    #                 _______                 _______                 _______                 #
+    #                /       \               /       \               /       \                #
+    #               |   AS2   |-------------|   AS4   |-------------|   AS9   |               #
+    #                \_______/               \_______/               \_______/                #
+    #               /                                                                         #
+    #     _______  /              _______                 _______                 _______     #
+    #    /       \/              /       \               /       \               /       \    #
+    #   |   AS1   |-------------|   AS7   |             |   AS5   |-------------|   AS10  |   #
+    #    \_______/\              \_______/               \_______/               \_______/    #
+    #              \                                    /                                     #
+    #               \ _______                 _______  /                                      #
+    #                /       \               /       \/                                       #
+    #               |   AS3   |-------------|   AS6   |                                       #
+    #                \_______/               \_______/\                                       #
+    #                                                  \                                      #
+    #                                                   \ _______                             #
+    #                                                    /       \                            #
+    #                                                   |   AS8   |                           #
+    #                                                    \_______/                            #
+    #                                                                                         #
+    #                                 *DEFAULT CONNECTIONS*                  'Art' By Uteaami #
+    ##########################################################################################
+    """
+
+# Print the introductory text
+    print(bgp_ASCII_print)
+    print(intro_text)
+    print(bgp_ASCII_connections_print)
+    startup_wait = True
+
     while (True):
         option1 = input("\nConnect router (or 'enter' to continue): ")
         if option1 == '':
@@ -91,8 +136,14 @@ def main():
         router.start()
     
     while True:
-        time.sleep(40)
+        if startup_wait:
+            time.sleep(30)
+            startup_wait = False
 
+        option = input("\n Print routingtable of router (r1, r2, ..., r10): ")
+        for router in routers:
+            if option == router.name:
+                print(router.routingtable)
 
 if __name__ == "__main__":
     main()
