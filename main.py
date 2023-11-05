@@ -1,7 +1,9 @@
 import time
 from bgp.components.Router import Router
 from ScriptRunner import run_startup_scripts
+from GlobalText import *
 import tomli
+from bgp.components.Globals import *
 
 #USE ONLY WITH LINUX SYSTEMS
 run_startup_scripts()
@@ -65,6 +67,10 @@ def add_server_address(router):
 
 def main():
 
+# Print the introductory text
+    print(bgp_ASCII_INTRO)
+    startup_wait = True
+
     while (True):
         option1 = input("\nConnect router (or 'enter' to continue): ")
         if option1 == '':
@@ -91,8 +97,18 @@ def main():
         router.start()
     
     while True:
-        time.sleep(40)
-
+        if startup_wait:
+            time.sleep(40)
+            startup_wait = False
+    
+        best_routes = topology_table.find_best_routes()
+        for router in routers:
+            router.apply_best_routes(routers, best_routes)
+            
+        option = input("\n Print routingtable of router (r1, r2, ..., r10): ")
+        for router in routers:
+            if option == router.name:
+                print(router.routingtable)
 
 if __name__ == "__main__":
     main()
