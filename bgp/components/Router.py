@@ -1,7 +1,6 @@
 import time
 import random
 import threading
-import socket
 import time
 from bgp.components.Client import Client
 from bgp.components.RouterStates import RouterStates
@@ -60,8 +59,8 @@ class Router(threading.Thread):
                     while current_router:
                         path.insert(0, current_router)
                         current_router = data["previous_routers"][current_router]
-                    trouter = get_router_by_id(routers, target_router)
-                    self.add_routing_table_entry(trouter, distance, path)
+                    entry_router = get_router_by_id(routers, target_router)
+                    self.add_routing_table_entry(entry_router, distance, path)
 
     def get_neighbor_router_by_AS(self, AS):
         for neighbor in self.neighbours:
@@ -90,7 +89,6 @@ class Router(threading.Thread):
         ServerThread.set_parent(self)
         ServerThread.start()
         time.sleep(1)
-        # ServerThread.set_msg("asd")
 
         for cli in self.client:
             time.sleep(1)
