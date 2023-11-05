@@ -82,7 +82,6 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
     # Each path attribute is a triple
     # <attribute type, attribute length, attribute value> of variable length.
         
-        # attr_flag_2octet = 0b01010000 + type # will not be needed
         ORIGIN_t = 0b0100000000000001
         AS_PATH_t = 0b0100000000000010  
         NEXT_HOP_t = 0b0100000000000011
@@ -126,13 +125,4 @@ def create_update(wdroutes, ORIGIN, AS_PATH, NEXT_HOP, NLRI):
 def create_keepalive():
     return construct_header(0, 4)
 
-#asd = 0
-#optparam = asd.to_bytes(5, byteorder="big")
-#open(1, 10, 0, optparam)
-#ORIGIN = 1
-#AS_PATH = [1, 2, 3]
-#NEXT_HOP = "1.1.1.1"
 print(ip2int("1.0.0.1"))
-#print(binascii.hexlify(create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
-#print((create_update(0, ORIGIN, AS_PATH, NEXT_HOP, 0)))
-#print(create_open(16, 7, 255, 0))

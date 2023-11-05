@@ -5,8 +5,7 @@ from GlobalText import *
 import tomli
 from bgp.components.Globals import *
 
-#USE ONLY WITH LINUX SYSTEMS
-run_startup_scripts()
+run_startup_scripts() #USE ONLY WITH LINUX SYSTEMS
 
 with open("config.toml", mode="rb") as fp:
     config = tomli.load(fp)
@@ -67,8 +66,9 @@ def add_server_address(router):
 
 def main():
 
-# Print the introductory text
+# Print the introduction text
     print(bgp_ASCII_INTRO)
+    print(bgp_usage)
     startup_wait = True
 
     while (True):
@@ -98,14 +98,14 @@ def main():
     
     while True:
         if startup_wait:
-            time.sleep(40)
+            time.sleep(45)
             startup_wait = False
     
         best_routes = topology_table.find_best_routes()
         for router in routers:
             router.apply_best_routes(routers, best_routes)
             
-        option = input("\n Print routingtable of router (r1, r2, ..., r10): ")
+        option = input("\n Print routingtable of router: ")
         for router in routers:
             if option == router.name:
                 print(router.routingtable)

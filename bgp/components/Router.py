@@ -21,7 +21,7 @@ class Router(threading.Thread):
         self.client = []
         self.lock = threading.Lock()
         self.routingtable = RoutingTable()
-        self.server = None     # Tämä on servun IP-osoite
+        self.server = None     # IP-Address
         self.instances_n = 0   # Nämä muuttujat 
         self.instances = 0     # ^^
         self.state = RouterStates.OFFLINE
@@ -36,7 +36,6 @@ class Router(threading.Thread):
     def append_neighbor_ASS(self, ASS):
         self.neighbor_ASS.append(ASS)
 
-    # Probably not needed not 100% sure.
     def add_neighbour_router(self, neighbour):
         self.neighbours.append(neighbour)
         neighbour.neighbours.append(self)
@@ -44,8 +43,6 @@ class Router(threading.Thread):
     def add_client(self, client_addr, server_addr):
         self.client.append((client_addr, server_addr))
 
-    # To add an entry, only neighbor router is needed
-    # Define other functions so that in the end this function will be called
     def add_routing_table_entry(self, neighbor_router, distance, path):
         self.routingtable.add_route(
             self.server, neighbor_router.server, neighbor_router.AS, distance, path)
