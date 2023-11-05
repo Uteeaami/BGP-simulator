@@ -7,7 +7,7 @@ from bgp.components.Client import Client
 from bgp.components.RouterStates import RouterStates
 from bgp.components.RoutingTable import RoutingTable
 from bgp.components.Server import Server
-
+from bgp.components.Globals import get_router_by_id
 
 class Router(threading.Thread):
     def __init__(self, name, id, AS):
@@ -47,10 +47,22 @@ class Router(threading.Thread):
 
     # To add an entry, only neighbor router is needed
     # Define other functions so that in the end this function will be called
-    def add_routing_table_entry(self, neighbor_router):
+    def add_routing_table_entry(self, neighbor_router, distance, path):
         self.routingtable.add_route(
-            self.server, neighbor_router.server, neighbor_router.AS)
-        
+            self.server, neighbor_router.server, neighbor_router.AS, distance, path)
+    
+    def apply_best_routes(self, routers, best_routes):
+        for router, data in best_routes.items():
+            if router == self.id:
+                for target_router, distance in data["distances"].items():
+                    path = []
+                    current_router = target_router
+                    while current_router:
+                        path.insert(0, current_router)
+                        current_router = data["previous_routers"][current_router]
+                    trouter = get_router_by_id(routers, target_router)
+                    self.add_routing_table_entry(trouter, distance, path)
+
     def get_neighbor_router_by_AS(self, AS):
         for neighbor in self.neighbours:
             if neighbor.AS.replace('AS', '') == str(AS):

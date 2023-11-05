@@ -23,6 +23,7 @@ class Client(threading.Thread):
     def run(self):
         print("running client on", self.parent, self.bind_addr)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        time.sleep(random.randint(1,5))
         try:
             sock.bind(self.bind_addr)
         except Exception as e:

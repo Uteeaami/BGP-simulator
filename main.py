@@ -1,7 +1,9 @@
 import time
 from bgp.components.Router import Router
 from ScriptRunner import run_startup_scripts
+from GlobalText import *
 import tomli
+from bgp.components.Globals import *
 
 #USE ONLY WITH LINUX SYSTEMS
 run_startup_scripts()
@@ -65,46 +67,8 @@ def add_server_address(router):
 
 def main():
 
-    intro_text = "This is a project for the Protocol Processing course, created by MarkLeppi, Eikrt, and Uteeaami."
-    bgp_ASCII_INTRO = """
-                   ______   _______  _______         _______ _________ _______ 
-                  (  ___ \ (  ____ \(  ____ )       (  ____ \\__   __/(       )
-                  | (   ) )| (    \/| (    )|       | (    \/   ) (   | () () |
-                  | (__/ / | |      | (____)| _____ | (_____    | |   | || || |
-                  |  __ (  | | ____ |  _____)(_____)(_____  )   | |   | |(_)| |
-                  | (  \ \ | | \_  )| (                   ) |   | |   | |   | |
-                  | )___) )| (___) || )             /\____) |___) (___| )   ( |
-                  |/ \___/ (_______)|/              \_______)\_______/|/     \|
-
-    ###########################################################################################
-    #                                *DEFAULT CONNECTIONS*                                    #
-    #                 _______                 _______                 _______                 #
-    #                /       \               /       \               /       \                #
-    #               |   AS2   |-------------|   AS4   |-------------|   AS9   |               #
-    #                \_______/               \_______/               \_______/                #
-    #               /                                                                         #
-    #     _______  /              _______                 _______                 _______     #
-    #    /       \/              /       \               /       \               /       \    #
-    #   |   AS1   |-------------|   AS7   |             |   AS5   |-------------|   AS10  |   #
-    #    \_______/\              \_______/               \_______/               \_______/    #
-    #              \                                    /                                     #
-    #               \ _______                 _______  /                                      #
-    #                /       \               /       \/                                       #
-    #               |   AS3   |-------------|   AS6   |                                       #
-    #                \_______/               \_______/\                                       #
-    #                                                  \                                      #
-    #                                                   \ _______                             #
-    #                                                    /       \                            #
-    #                                                   |   AS8   |                           #
-    #                                                    \_______/                            #
-    #                                                                                         #
-    #                                 *DEFAULT CONNECTIONS*                  'Art' By Uteaami #
-    ###########################################################################################
-    """
-
 # Print the introductory text
     print(bgp_ASCII_INTRO)
-    print(intro_text)
     startup_wait = True
 
     while (True):
@@ -134,9 +98,13 @@ def main():
     
     while True:
         if startup_wait:
-            time.sleep(30)
+            time.sleep(40)
             startup_wait = False
-
+    
+        best_routes = topology_table.find_best_routes()
+        for router in routers:
+            router.apply_best_routes(routers, best_routes)
+            
         option = input("\n Print routingtable of router (r1, r2, ..., r10): ")
         for router in routers:
             if option == router.name:
