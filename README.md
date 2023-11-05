@@ -76,7 +76,7 @@ Please make sure you have Docker installed and properly configured on your syste
 
 ## Disclaimer
 
-This project is intended for educational purposes and should be used responsibly and within the bounds of your institution's ethical guidelines and policies. Simulation of network protocols may have legal and ethical implications, so use this software responsibly and only for the intended purposes of your course.
+This project is intended for educational purposes.
 
 For any issues or questions related to the BGP-simulator, feel free to contact the project maintainers.
 
