@@ -12,7 +12,7 @@ class RoutingTable:
         self.routing_table[prefix].append({
             "next_hop": next_hop,
             "as_path": 16386,
-            "origin": "i",
+            "origin": "e",
             "local_pref": random.randint(0, 100),
             "med": 0,
             "route_type": 20,
