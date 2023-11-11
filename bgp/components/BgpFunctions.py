@@ -1,10 +1,8 @@
 import struct
 from bgp.components.BgpPacket import *
-from bgp.components.Globals import topology_table
 import threading
 import time
 import struct
-import binascii
 # Clientti kutsuu funktiota muuttujalla sock, Server: self.request
 
 
@@ -26,8 +24,13 @@ def BGP_FSM(self, parent):
     this_neighbor_addr = self.getpeername()[0] # osoiteadd_routing_table_entry
 
     parent.append_neighbor_ASS((this_neighbor_AS, this_neighbor_addr))
+    
+    # Create table entries for neighbors
     neighbor = parent.get_neighbor_router_by_AS(this_neighbor_AS)
-    topology_table.add_route(parent.id, neighbor.id)
+    parent.add_neighbor_to_routing_table(neighbor)
+
+    # neighbor = parent.get_neighbor_router_by_AS(this_neighbor_AS)
+    # topology_table.add_route(parent.id, neighbor.id)
 
     parent.instances_n += 1
     receiver_thread = threading.Thread(target = receiver, args = (self, parent, ))
@@ -142,8 +145,10 @@ def handle_update(msg, self, parent):
         NLRIS.append((cidr_len, prefix))
 
     print("AS", parent.id, "received update from:", self.getpeername()[0], "AS", AS_PATH[0], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRIS)
+    # 1, Mistä AS:stä, nexthop, minne jakeleeS
     recv_update = [ORIGIN, AS_PATH, NEXT_HOP, NLRIS]
     parent.update_queue.append(recv_update)
+    parent.add_entry_to_topology_table(AS_PATH, NEXT_HOP, NLRIS)
 
 def create_propagate_update(self, parent, recv_update):
     ORIGIN = 1
@@ -166,6 +171,7 @@ def first_updates(self, parent, this_neighbor_AS):
             prefix = AS[1]
             NLRI = ((AS[0], prefix))
             sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI)
+            parent.add_entry_to_topology_table(AS_PATH, NEXT_HOP, NLRI)
             queue.append(sendable)
             
     return queue
