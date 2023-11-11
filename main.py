@@ -5,7 +5,7 @@ from GlobalText import *
 import tomli
 from bgp.components.Globals import *
 
-run_startup_scripts() #USE ONLY WITH LINUX SYSTEMS
+run_startup_scripts() # USE ONLY WITH LINUX SYSTEMS
 
 with open("config.toml", mode="rb") as fp:
     config = tomli.load(fp)
@@ -55,8 +55,9 @@ def create_default_connections():
 
 def create_manual_connection(router, neighbor):
     add_server_address(router)
+    add_server_address(neighbor)
     router.add_client(real_address[0], neighbor.get_server())
-    router.add_routing_table_entry(neighbor)
+    router.add_neighbour_router(neighbor)
     del real_address[0]
 
 def add_server_address(router):
@@ -95,15 +96,16 @@ def main():
 
     for router in routers:
         router.start()
+
     
     while True:
         if startup_wait:
             time.sleep(45)
             startup_wait = False
-    
-        best_routes = topology_table.find_best_routes()
+        
         for router in routers:
-            router.apply_best_routes(routers, best_routes)
+            router.topologytable.check_for_dupes()
+            router.add_routing_table_entries()
             
         option = input("\n Print routingtable of router: ")
         for router in routers:
