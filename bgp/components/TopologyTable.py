@@ -12,8 +12,6 @@ class TopologyTable:
                 if tmp[0] == inner_tmp[0]:
                     dist1 = entry.get("DIST")
                     dist2 = second_entry.get("DIST")
-                    if len(dist1) < len(dist2):
-                        print("WINNER", entry)
-                        print("REMOCED", second_entry)
+                    if len(dist1) < len(dist2):                      
                         self.table.remove(second_entry)
 

@@ -59,7 +59,6 @@ class Router(threading.Thread):
             paths = entry.get("PATH")
             for path in paths:
                 route.append(path)
-            route.append(dest_as[0])
             self.routingtable.add_route(
                 dest_as[1], entry.get("NEXT_HOP"), dest_as[0], len(distance) + 1, route)  
     
@@ -71,7 +70,6 @@ class Router(threading.Thread):
     def add_entry_to_topology_table(self, as_path, next_hop, nlris):
         for neihgbor in self.neighbours:
             if nlris[0][0] == neihgbor.id or nlris[0][0] == self.id:
-                print("Didnt add anything")
                 return 
         entry = {
             "NEXT_HOP": next_hop, 

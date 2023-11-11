@@ -104,23 +104,13 @@ def main():
             startup_wait = False
         
         for router in routers:
-            print("ROUTER:", router.name)
-            for entry in router.topologytable.table:
-                print("UPDATE", entry)
             router.topologytable.check_for_dupes()
             router.add_routing_table_entries()
-            print(router.routingtable)
-
-        break
-    
-        # best_routes = topology_table.find_best_routes()
-        # for router in routers:
-        #     router.apply_best_routes(routers, best_routes)
             
-        # option = input("\n Print routingtable of router: ")
-        # for router in routers:
-        #     if option == router.name:
-        #         print(router.routingtable)
+        option = input("\n Print routingtable of router: ")
+        for router in routers:
+            if option == router.name:
+                print(router.routingtable)
 
 if __name__ == "__main__":
     main()
