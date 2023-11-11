@@ -70,7 +70,8 @@ class Router(threading.Thread):
 
     def add_entry_to_topology_table(self, as_path, next_hop, nlris):
         for neihgbor in self.neighbours:
-            if nlris[0] == neihgbor.id:
+            if nlris[0][0] == neihgbor.id or nlris[0][0] == self.id:
+                print("Didnt add anything")
                 return 
         entry = {
             "NEXT_HOP": next_hop, 
@@ -79,37 +80,6 @@ class Router(threading.Thread):
             "PATH": as_path
             }
         self.topologytable.table.append(entry)
-
-    # def build_graph(self):
-    #     graph = {}
-
-    #     for entry in self.topologytable.table:
-    #         dest_as = entry["DEST_AS"]
-    #         dist = entry["DIST"]
-
-    #         dest_as_str = str(dest_as)  # Convert to string
-
-    #         if dest_as_str not in graph:
-    #             graph[dest_as_str] = {}
-
-    #         for neighbor in dist:
-    #             neighbor_str = str(neighbor)  # Convert to string
-    #             graph[dest_as_str][neighbor_str] = 1  # Assuming equal weight for simplicity
-
-    #     return graph
-
-    # def find_shortest_paths(self):
-    #     shortest_paths = {}
-
-    #     graph = self.build_graph()
-
-    #     for entry in self.topologytable.table:
-    #         dest_as = entry["DEST_AS"]
-    #         start_node = entry["DIST"][0]
-    #         distances = self.topologytable.dijkstra(graph, start_node)
-    #         shortest_paths[dest_as] = distances
-
-    #     return shortest_paths
 
     def set_server(self, server_addr):
         self.server = server_addr

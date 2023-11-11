@@ -107,6 +107,7 @@ def main():
             print("ROUTER:", router.name)
             for entry in router.topologytable.table:
                 print("UPDATE", entry)
+            router.topologytable.check_for_dupes()
             router.add_routing_table_entries()
             print(router.routingtable)
 
