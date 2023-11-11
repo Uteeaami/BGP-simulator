@@ -5,7 +5,6 @@ import time
 import struct
 # Clientti kutsuu funktiota muuttujalla sock, Server: self.request
 
-
 def BGP_FSM(self, parent):
     first = True
     queue = []

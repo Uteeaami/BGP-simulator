@@ -3,7 +3,6 @@ from bgp.components.Router import Router
 from ScriptRunner import run_startup_scripts
 from GlobalText import *
 import tomli
-from bgp.components.Globals import *
 
 run_startup_scripts() # USE ONLY WITH LINUX SYSTEMS
 
@@ -55,7 +54,6 @@ def create_default_connections():
 
 def create_manual_connection(router, neighbor):
     add_server_address(router)
-    add_server_address(neighbor)
     add_server_address(neighbor)
     router.add_client(real_address[0], neighbor.get_server())
     del real_address[0]
