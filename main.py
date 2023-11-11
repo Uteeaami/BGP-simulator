@@ -107,6 +107,8 @@ def main():
             print("ROUTER:", router.name)
             for entry in router.topologytable.table:
                 print("UPDATE", entry)
+            router.add_routing_table_entries()
+            print(router.routingtable)
 
         break
     

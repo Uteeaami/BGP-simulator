@@ -109,7 +109,7 @@ class Router(threading.Thread):
     #         distances = self.topologytable.dijkstra(graph, start_node)
     #         shortest_paths[dest_as] = distances
 
-        # return shortest_paths
+    #     return shortest_paths
 
     def set_server(self, server_addr):
         self.server = server_addr
