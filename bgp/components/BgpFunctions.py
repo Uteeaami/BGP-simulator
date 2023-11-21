@@ -155,7 +155,6 @@ def handle_update(msg, self, parent):
         prefix = int.from_bytes(nlri[1 + n*5 : 7 + n*5], byteorder='big')
         prefix = int2ip(prefix)
         NLRIS.append((cidr_len, prefix))
-    if parent.id == 10:
         print("AS", parent.id, "received update from:", self.getpeername()[0], "AS", AS_PATH[0], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRIS)
     recv_update = [ORIGIN, AS_PATH, NEXT_HOP, NLRIS]
     parent.update_queue.append(recv_update)
