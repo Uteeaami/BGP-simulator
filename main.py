@@ -3,7 +3,6 @@ from bgp.components.Router import Router
 from ScriptRunner import run_startup_scripts
 from GlobalText import *
 import tomli
-from bgp.components.Globals import *
 
 run_startup_scripts() # USE ONLY WITH LINUX SYSTEMS
 
