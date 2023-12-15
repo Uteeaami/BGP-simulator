@@ -8,6 +8,10 @@ import struct
 def BGP_FSM(self, parent):
     first = True
     queue = []
+    recv_queue = []
+    own_upd_queue = []
+    index = 0
+
     id = parent.id
     BGPid = parent.BGPid
     holdtime = 7
@@ -32,33 +36,43 @@ def BGP_FSM(self, parent):
     # topology_table.add_route(parent.id, neighbor.id)
 
     parent.instances_n += 1
-    receiver_thread = threading.Thread(target = receiver, args = (self, parent, ))
+    receiver_thread = threading.Thread(target = receiver, args = (self, parent, recv_queue, ))
     receiver_thread.start()
     while True:
-        
-        if len(parent.update_queue) > 0:
-            parent.lock.acquire()
-            send = True
-            index = 0
 
-            for update in parent.update_queue:
-                for AS in update[1]:
-                    if AS == this_neighbor_AS:
-                        send = False
-                if send == True:
-                    sendable = create_propagate_update(self, parent, update)
-                    queue.append(sendable)
-                    del parent.update_queue[index]
-                    index -= 1
-                index += 1
+        if len(recv_queue) > 0:
+            msgs = []
+            msg = recv_queue[0]
+            original = binascii.hexlify(msg)
+            #print(original)
+            msglen = int.from_bytes(msg[16:18], byteorder='big')
+            while len(msg) > msglen:
+                msgs.append(msg[:msglen])
+                msg = msg[msglen:]
+                msglen = int.from_bytes(msg[16:18], byteorder='big')
 
-            if send == False:
-                parent.propagate_condition += 1
-            if parent.propagate_condition == parent.instances:
-                parent.update_queue = []
-                parent.propagate_condition = 0
+            if msglen == len(msg):
+                msgs.append(msg)
+            #print(original, (msgs))
+            for message in msgs:
+                if message[18] == 2:
+                    handle_update(message, self, parent)
+            del recv_queue [0]
 
-            parent.lock.release()
+        parent.lock.acquire()
+        add = True
+        count = 0
+        for i in range(index, len(parent.update_queue)):
+            update = parent.update_queue[i]
+            for AS in update[1]:
+                if AS == this_neighbor_AS:
+                    add = False
+            if add == True:
+                update = create_propagate_update(self, parent, update)
+                queue.append(update)
+            count += 1
+        index += count
+        parent.lock.release()
 
         if len(queue) > 0:
             for q in queue:
@@ -74,16 +88,13 @@ def BGP_FSM(self, parent):
 
         time.sleep(holdtime/3)  # "A reasonable maximum time between KEEPALIVE messages would be one third of the Hold Time interval."
 
-def receiver(self, parent):
+
+def receiver(self, parent, recv_queue):
+    # viestien katoaminen voi johtua siitä että handle_update ottaa prion eik self.recv
     while True:
         msg = self.recv(4096)
-        msglen = int.from_bytes(msg[16:18], byteorder='big')
+        recv_queue.append(msg)
 
-        if len(msg) > msglen:
-            msg = msg[:msglen]
-
-        if msg[18] == 2:
-            handle_update(msg, self, parent)
 
 # https://stackoverflow.com/a/13294427
 def int2ip(addr):
@@ -142,8 +153,7 @@ def handle_update(msg, self, parent):
         prefix = int.from_bytes(nlri[1 + n*5 : 7 + n*5], byteorder='big')
         prefix = int2ip(prefix)
         NLRIS.append((cidr_len, prefix))
-
-    print("AS", parent.id, "received update from:", self.getpeername()[0], "AS", AS_PATH[0], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRIS)
+        print("AS", parent.id, "received update from:", self.getpeername()[0], "AS", AS_PATH[0], "AS PATH:", AS_PATH, "NEXT HOP:", NEXT_HOP, ":", " that advertise routes(s) to:", NLRIS)
     recv_update = [ORIGIN, AS_PATH, NEXT_HOP, NLRIS]
     parent.update_queue.append(recv_update)
     parent.add_entry_to_topology_table(AS_PATH, NEXT_HOP, NLRIS)
@@ -170,7 +180,7 @@ def first_updates(self, parent, this_neighbor_AS):
             NLRI = ((AS[0], prefix))
             sendable = create_update(0, ORIGIN, AS_PATH, NEXT_HOP, NLRI)
             # EN TIIÄ TARRTEEKS TÄHÄN
-            # parent.add_entry_to_topology_table(AS_PATH, NEXT_HOP, NLRI)
+            #parent.add_entry_to_topology_table(AS_PATH, NEXT_HOP, NLRI)
             queue.append(sendable)
             
     return queue

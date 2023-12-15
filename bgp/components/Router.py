@@ -69,7 +69,6 @@ class Router(threading.Thread):
                 return neighbor
 
     def add_entry_to_topology_table(self, as_path, next_hop, nlris):
-        # Don't add neighbors or self
         for neihgbor in self.neighbours:
             if nlris[0][0] == neihgbor.id or nlris[0][0] == self.id:
                 return 
@@ -104,6 +103,7 @@ class Router(threading.Thread):
         for cli in self.client:
             time.sleep(1)
             client_port = random.randint(1024, 65535)
+            client_port = 12345
             client_addr = (cli[0], client_port)
             server_addr = (cli[1], 179)
             ClientThread = Client()

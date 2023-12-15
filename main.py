@@ -56,6 +56,7 @@ def create_manual_connection(router, neighbor):
     add_server_address(router)
     add_server_address(neighbor)
     router.add_client(real_address[0], neighbor.get_server())
+    router.add_neighbour_router(neighbor)
     del real_address[0]
 
 def add_server_address(router):
@@ -68,7 +69,6 @@ def main():
 # Print the introduction text
     print(bgp_ASCII_INTRO)
     print(bgp_usage)
-    startup_wait = True
 
     while (True):
         option1 = input("\nConnect router (or 'enter' to continue): ")
@@ -95,12 +95,8 @@ def main():
     for router in routers:
         router.start()
 
-    
     while True:
-        if startup_wait:
-            time.sleep(45)
-            startup_wait = False
-        
+        input()
         for router in routers:
             router.topologytable.check_for_dupes()
             router.add_routing_table_entries()
@@ -109,6 +105,6 @@ def main():
         for router in routers:
             if option == router.name:
                 print(router.routingtable)
-
+                
 if __name__ == "__main__":
     main()
