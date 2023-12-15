@@ -71,7 +71,6 @@ class Router(threading.Thread):
     def add_entry_to_topology_table(self, as_path, next_hop, nlris):
         for neihgbor in self.neighbours:
             if nlris[0][0] == neihgbor.id or nlris[0][0] == self.id:
-                #print("Didnt add anything")
                 return 
         entry = {
             "NEXT_HOP": next_hop, 

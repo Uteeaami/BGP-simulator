@@ -3,9 +3,7 @@ from bgp.components.BgpPacket import *
 import threading
 import time
 import struct
-import binascii
 # Clientti kutsuu funktiota muuttujalla sock, Server: self.request
-
 
 def BGP_FSM(self, parent):
     first = True
